@@ -84,7 +84,7 @@ We will consider three different personas in our stories. These personas are:
   visit the page.
 - I want to be able to easily deploy this service via docker and give the
   container a single directory bind mount that contains my configuration
-  files, and any theme or other assets required.
+  files and any theme files required.
 - I do not want the service to write a log to a file at this time. This
   will be a future feature.
 - I do want the service to log to the terminal for debugging and
@@ -243,12 +243,6 @@ log_level: "info"
 # Optional — if not set, the bundled "default" theme is used.
 default_theme: "default"
 
-# Optional path to a directory containing custom static assets (relative to
-# config directory). Must be a relative path — absolute paths are rejected
-# as a validation error at startup. This is independent of the themes/
-# directory — it is used to override bundled static files like the favicon,
-# not for theme CSS. An empty string is treated the same as omitting the key.
-static_assets_path: ""
 ```
 
 The `config.yml` file uses a flat structure with no top-level wrapping
@@ -345,11 +339,7 @@ user-provided files:
 
 The application bundles a simple default favicon and includes standard HTML
 meta tags (viewport, charset, description) for a polished out-of-the-box
-experience. Admins can override bundled static assets by placing files in
-the optional `static_assets_path` directory specified in `config.yml`.
-This works as a fallback chain: when a static file is requested, the
-application checks the custom `static_assets_path` first and falls back to
-the bundled assets. Admins only need to provide files they want to override.
+experience.
 
 ### Caching
 
@@ -382,10 +372,6 @@ if critical errors are found:
 - **Name collisions**: If two or more entries normalize to the same slug,
   the service logs an error with the original names and shared slug, and
   exits.
-- **Absolute `static_assets_path`**: If `static_assets_path` in
-  `config.yml` is an absolute path, the service logs an error and exits.
-  Only relative paths (resolved against the config directory) are
-  accepted.
 - **Unknown config keys**: If `config.yml` contains keys that are not
   recognized, the service logs a warning for each unknown key but
   continues to start. This helps administrators catch typos without
@@ -437,3 +423,6 @@ considered for future development:
 - **Dynamic configuration reload**: Reload `config.yml` and
   `directory.yml` without requiring a service restart, either via
   file-watching or a reload signal.
+- **`static_assets_path` support**: Add a `static_assets_path` config
+  option allowing admins to override bundled static files (e.g., favicon)
+  with custom assets from a directory relative to the config directory.

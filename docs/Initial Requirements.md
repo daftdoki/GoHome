@@ -116,7 +116,7 @@ We will consider three different personas in our stories. These personas are:
   switching, and cookie management — no other client-side behavior.
 - All code will:
   - be appropriately tested with a robust test suite using pytest as the test framework.
-  - Focus on thouroughly testing interfaces, not just on code coverage.
+  - Focus on thoroughly testing interfaces, not just on code coverage.
   - Frontend JavaScript will not have its own test suite. JS behavior (theme
     toggling, cookie management) will be verified through server-side
     integration tests using Flask's test client. Note: Flask's test client
@@ -147,14 +147,14 @@ We will consider three different personas in our stories. These personas are:
   directory.yml (See: Example directory.yml)
 - End user and administrator documentation should be kept up to date in the
   README.md file in the root of the repository. Programmer / Developer
-  documentation for how to setup a build endvironment, contribute, build,
+  documentation for how to setup a build environment, contribute, build,
   and test the application should also be present in the README.md. This
   file should have examples where appropriate.
 - Claude Code will be used to assist in development. A CLAUDE.md file
   should be maintained in the root of the repository with information
   necessary for Claude when working on this repository.
-- When Claude troubeshoots and fixes problems, it will update a file in
-  docs/troubleshooting.md that records the problem, it's soltuion, and its
+- When Claude troubleshoots and fixes problems, it will update a file in
+  docs/troubleshooting.md that records the problem, its solution, and the
   troubleshooting steps used to diagnose and fix the problem.
 - An integration test must be performed to verify the app server starts and
   returns expected responses. At minimum, test that: (1) the root URL
@@ -247,7 +247,7 @@ default_theme: "default"
 # config directory). Must be a relative path — absolute paths are rejected
 # as a validation error at startup. This is independent of the themes/
 # directory — it is used to override bundled static files like the favicon,
-# not for theme CSS.
+# not for theme CSS. An empty string is treated the same as omitting the key.
 static_assets_path: ""
 ```
 
@@ -255,6 +255,10 @@ The `config.yml` file uses a flat structure with no top-level wrapping
 key (unlike `directory.yml` which uses a `directory:` key). All settings
 have sensible defaults and the file is optional. If `config.yml` is not
 present, the service runs with default values.
+
+Both `config.yml` and `directory.yml` are read and validated once at
+startup. Changes to either file require restarting the service to take
+effect.
 
 ### Theming
 
@@ -269,7 +273,15 @@ Multiple themes may be installed and available to users. The admin can
 optionally set the default theme via `default_theme` in `config.yml`; if
 not specified, the bundled "default" theme is used. Users can select a
 different theme and toggle light/dark mode from the footer. The user's
-selected theme and mode preference are stored in cookies.
+selected theme and mode preference are stored in cookies. Cookies are
+only set when the user explicitly changes a setting via the footer
+controls — on first visit with no cookies, the admin's `default_theme`
+and the browser's `prefers-color-scheme` are used without setting any
+cookies.
+
+Each theme CSS file must be fully self-contained — custom themes do not
+inherit from or layer on top of the bundled default theme. Theme authors
+are responsible for defining all necessary CSS custom properties and styles.
 
 A clean, simple default theme is bundled with the application so the service
 looks good and works out of the box with zero configuration. Custom themes
@@ -288,6 +300,10 @@ works as a direct redirect even if Netflix is defined inside a Streaming
 category. Category names can also be used as paths (e.g., `go/Streaming`)
 to render that sub-section.
 
+URL path lookup is case-insensitive. The incoming path is normalized
+using the same rules as entry names, so `go/Netflix`, `go/NETFLIX`,
+and `go/netflix` all resolve to the same entry.
+
 Only flat, single-segment paths are supported. Nested paths like
 `go/streaming/netflix` are not valid and are treated the same as any
 unknown path. There is no hierarchical path routing.
@@ -299,11 +315,7 @@ normalized slug, and exits.
 
 If a user visits a path that does not match any known link or category
 name, the service responds with an HTTP 302 redirect to the root
-directory page. A flash message (using Flask's built-in `flash()`
-mechanism) is displayed on the redirected page indicating that the
-requested path was not found. The application generates a random
-`SECRET_KEY` at startup to support flash message sessions; since flash
-messages are ephemeral, sessions do not need to survive restarts.
+directory page.
 
 ### Docker
 
@@ -352,6 +364,9 @@ if critical errors are found:
 
 - **Missing `directory.yml`**: The service logs an error and exits. The
   directory file is required.
+- **Empty directory**: If `directory.yml` exists and is valid YAML but
+  the `directory` list is empty (`directory: []`), the service logs an
+  error and exits. An empty directory serves no purpose.
 - **Malformed YAML**: If `directory.yml` (or `config.yml` if present)
   contains invalid YAML, the service logs a parse error and exits.
 - **Invalid entries**: If any entry is missing the required `name` key,
@@ -371,6 +386,10 @@ if critical errors are found:
   `config.yml` is an absolute path, the service logs an error and exits.
   Only relative paths (resolved against the config directory) are
   accepted.
+- **Unknown config keys**: If `config.yml` contains keys that are not
+  recognized, the service logs a warning for each unknown key but
+  continues to start. This helps administrators catch typos without
+  being overly strict.
 
 This strict validation ensures the administrator is immediately aware of
 configuration problems rather than discovering them at runtime through
@@ -390,7 +409,8 @@ rules:
 
 - Convert to lowercase
 - Replace spaces with hyphens (`-`)
-- Strip all characters that are not letters, numbers, or hyphens
+- Strip all characters that are not ASCII letters, ASCII digits, or hyphens
+  (non-ASCII characters like accented letters are removed)
 - Collapse consecutive hyphens into a single hyphen
 
 For example: `My Cool Link!` becomes `my-cool-link`. Name uniqueness is
@@ -411,3 +431,9 @@ considered for future development:
   directory page for quickly finding links.
 - **`base_url` support**: Add support for hosting behind a reverse proxy at
   a subpath (e.g., `/go`).
+- **Flash messages for unknown paths**: Display a notification on the
+  redirected page when a user visits an unknown path, indicating the
+  requested link was not found.
+- **Dynamic configuration reload**: Reload `config.yml` and
+  `directory.yml` without requiring a service restart, either via
+  file-watching or a reload signal.

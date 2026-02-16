@@ -58,6 +58,9 @@ We will consider three different personas in our stories. These personas are:
     up a sub-section or return to the main page. The format uses `>` as
     the separator (e.g., "Home > Streaming"). "Home" links to the root
     page; the current page name is plain text (not a link).
+  - The browser tab title (`<title>` tag) shows the `site_title` on the
+    root page. On sub-section pages it uses the format
+    `"SiteTitle — SectionName"` (e.g., `"GoHome — Streaming"`).
   - The footer should allow me to select a theme and toggle light and dark
     modes. The theme selector is rendered as a `<select>` dropdown and is
     always visible, even if only the bundled default theme is available.
@@ -87,7 +90,8 @@ We will consider three different personas in our stories. These personas are:
 - I do want the service to log to the terminal for debugging and
   troubleshooting as a docker container.
 - I want to specify a name, url, and short description for each link in
-  the directory
+  the directory. Categories also support an optional description that is
+  displayed beneath the category heading when present.
 - I want a sample configuration directory (e.g., `sample_config/`) included
   in the repository with a working `directory.yml` (and optionally a
   `config.yml`) so that I can immediately try out the application without
@@ -214,8 +218,9 @@ either a category when the `entries` key is present, or a link when the
 ignored and the entry is assumed to be a category. The `entries` key
 contains a list of links for the category. Only one level of category is
 supported and any categories defined inside of a category are ignored.
-The service logs a warning at startup identifying any nested categories
-that were skipped.
+All entries inside a nested category (including regular links) are also
+discarded. The service logs a warning at startup identifying any nested
+categories that were skipped, including a count of discarded entries.
 
 ### config.yml
 
@@ -239,13 +244,17 @@ log_level: "info"
 default_theme: "default"
 
 # Optional path to a directory containing custom static assets (relative to
-# config directory). This is independent of the themes/ directory — it is
-# used to override bundled static files like the favicon, not for theme CSS.
+# config directory). Must be a relative path — absolute paths are rejected
+# as a validation error at startup. This is independent of the themes/
+# directory — it is used to override bundled static files like the favicon,
+# not for theme CSS.
 static_assets_path: ""
 ```
 
-All settings have sensible defaults and the file is optional. If
-`config.yml` is not present, the service runs with default values.
+The `config.yml` file uses a flat structure with no top-level wrapping
+key (unlike `directory.yml` which uses a `directory:` key). All settings
+have sensible defaults and the file is optional. If `config.yml` is not
+present, the service runs with default values.
 
 ### Theming
 
@@ -290,19 +299,23 @@ normalized slug, and exits.
 
 If a user visits a path that does not match any known link or category
 name, the service responds with an HTTP 302 redirect to the root
-directory page. A flash message is displayed on the redirected page
-indicating that the requested path was not found.
+directory page. A flash message (using Flask's built-in `flash()`
+mechanism) is displayed on the redirected page indicating that the
+requested path was not found. The application generates a random
+`SECRET_KEY` at startup to support flash message sessions; since flash
+messages are ephemeral, sessions do not need to survive restarts.
 
 ### Docker
 
 The application targets Python 3.13 and uses `python:3.13-slim` as the
 Docker base image. The Docker container runs Flask's built-in development
-server. Inside the container, the application always binds to
-`0.0.0.0:8080` by default, ignoring any `host` or `port` values in
-`config.yml`. The internal port can be overridden via the `GOHOME_HOST`
-and `GOHOME_PORT` environment variables. External port mapping is handled
-entirely by docker-compose. The `host` and `port` settings in `config.yml`
-are only used when running the application outside of Docker.
+server. The host and port the application binds to are resolved using the
+following priority order: environment variables (`GOHOME_HOST` /
+`GOHOME_PORT`) take precedence over `config.yml` values, which take
+precedence over built-in defaults (`0.0.0.0` / `8080`). The Dockerfile
+sets `GOHOME_HOST=0.0.0.0` and `GOHOME_PORT=8080` so that the container
+binds correctly regardless of what `config.yml` contains. External port
+mapping is handled entirely by docker-compose.
 
 A single bind mount directory is mapped into the container containing all
 user-provided files:
@@ -345,9 +358,19 @@ if critical errors are found:
   or has neither a `url` nor an `entries` key, the service logs an error
   identifying the problematic entry and exits. All entries must be valid
   for the service to start.
+- **Empty entries list**: If a category has an `entries` key with an
+  empty list (`entries: []`), the service logs an error identifying the
+  category and exits. Categories must contain at least one entry.
+- **Empty normalized slug**: If a name normalizes to an empty string
+  (e.g., `name: "!!!"`) after applying the normalization rules, the
+  service logs an error identifying the entry and exits.
 - **Name collisions**: If two or more entries normalize to the same slug,
   the service logs an error with the original names and shared slug, and
   exits.
+- **Absolute `static_assets_path`**: If `static_assets_path` in
+  `config.yml` is an absolute path, the service logs an error and exits.
+  Only relative paths (resolved against the config directory) are
+  accepted.
 
 This strict validation ensures the administrator is immediately aware of
 configuration problems rather than discovering them at runtime through

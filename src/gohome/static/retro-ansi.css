@@ -1,16 +1,18 @@
 /* GoHome — Retro ANSI Terminal Theme
  *
- * Multi-color ANSI terminal aesthetic: monospaced font, scanline overlay,
- * glow effects, and a subtle screen flicker.
+ * 80s arcade ANSI aesthetic: neon magenta, electric green, and hot yellow
+ * on deep purple-black — the classic CGA multi-color palette with CRT
+ * scanlines, phosphor glow, and screen flicker.
  *
  * Uses distinct ANSI palette colors per element type:
- *   - Body text: gray (ANSI normal white)
+ *   - Body text: pure white (crisp arcade readout)
+ *   - Muted text / descriptions: dim purple-violet
  *   - Links: bright green (ANSI bright green)
- *   - Category headings: bright cyan (ANSI bright cyan)
+ *   - Category headings: bright magenta (ANSI bright magenta — arcade pink)
  *   - Prompt accents: bright yellow (ANSI bright yellow)
  *
- * Dark mode: ANSI colors on near-black
- * Light mode: muted ANSI-inspired palette on off-white background
+ * Dark mode: neon accents on deep purple-black with a magenta phosphor glow
+ * Light mode: vivid magenta and green accents on a pale lavender background
  *
  * Custom themes are fully self-contained and do not inherit from the
  * default theme.
@@ -20,20 +22,20 @@
 /* Custom properties — dark mode (default)                            */
 /* ------------------------------------------------------------------ */
 :root {
-    --color-bg: #0c0c0c;
-    --color-text: #aaaaaa;
-    --color-text-muted: #555555;
+    --color-bg: #0d000d;
+    --color-text: #ffffff;
+    --color-text-muted: #aa77cc;
     --color-link: #55ff55;
     --color-link-hover: #ffffff;
-    --color-heading: #55ffff;
+    --color-heading: #ff55ff;
     --color-prompt: #ffff55;
-    --color-border: #333333;
-    --color-header-bg: #0c0c0c;
-    --color-footer-bg: #0c0c0c;
-    --color-category-bg: #111111;
-    --color-glow: rgba(85, 255, 85, 0.20);
-    --color-glow-strong: rgba(85, 255, 255, 0.35);
-    --color-scanline: rgba(0, 0, 0, 0.15);
+    --color-border: #440055;
+    --color-header-bg: #110011;
+    --color-footer-bg: #110011;
+    --color-category-bg: #150018;
+    --color-glow: rgba(255, 85, 255, 0.18);
+    --color-glow-strong: rgba(255, 85, 255, 0.55);
+    --color-scanline: rgba(0, 0, 0, 0.25);
     --font-family: "Courier New", Courier, monospace;
     --max-width: 60rem;
     --spacing: 1rem;
@@ -43,17 +45,17 @@
 /* Light mode via .light body class                                   */
 /* ------------------------------------------------------------------ */
 body.light {
-    --color-bg: #f5f5f5;
-    --color-text: #1a1a1a;
-    --color-text-muted: #666666;
+    --color-bg: #faf0ff;
+    --color-text: #1a001a;
+    --color-text-muted: #7744aa;
     --color-link: #006600;
     --color-link-hover: #003300;
-    --color-heading: #005c5c;
-    --color-prompt: #6b6b00;
-    --color-border: #cccccc;
-    --color-header-bg: #f5f5f5;
-    --color-footer-bg: #f5f5f5;
-    --color-category-bg: #ebebeb;
+    --color-heading: #cc00cc;
+    --color-prompt: #888800;
+    --color-border: #cc99dd;
+    --color-header-bg: #f0e0ff;
+    --color-footer-bg: #f0e0ff;
+    --color-category-bg: #ede0f8;
     --color-glow: transparent;
     --color-glow-strong: transparent;
     --color-scanline: rgba(0, 0, 0, 0.04);
@@ -63,20 +65,20 @@ body.light {
 /* Dark mode via .dark body class (same as :root default)             */
 /* ------------------------------------------------------------------ */
 body.dark {
-    --color-bg: #0c0c0c;
-    --color-text: #aaaaaa;
-    --color-text-muted: #555555;
+    --color-bg: #0d000d;
+    --color-text: #ffffff;
+    --color-text-muted: #aa77cc;
     --color-link: #55ff55;
     --color-link-hover: #ffffff;
-    --color-heading: #55ffff;
+    --color-heading: #ff55ff;
     --color-prompt: #ffff55;
-    --color-border: #333333;
-    --color-header-bg: #0c0c0c;
-    --color-footer-bg: #0c0c0c;
-    --color-category-bg: #111111;
-    --color-glow: rgba(85, 255, 85, 0.20);
-    --color-glow-strong: rgba(85, 255, 255, 0.35);
-    --color-scanline: rgba(0, 0, 0, 0.15);
+    --color-border: #440055;
+    --color-header-bg: #110011;
+    --color-footer-bg: #110011;
+    --color-category-bg: #150018;
+    --color-glow: rgba(255, 85, 255, 0.18);
+    --color-glow-strong: rgba(255, 85, 255, 0.55);
+    --color-scanline: rgba(0, 0, 0, 0.25);
 }
 
 /* ------------------------------------------------------------------ */
@@ -84,17 +86,17 @@ body.dark {
 /* ------------------------------------------------------------------ */
 @media (prefers-color-scheme: light) {
     body:not(.light):not(.dark) {
-        --color-bg: #f5f5f5;
-        --color-text: #1a1a1a;
-        --color-text-muted: #666666;
+        --color-bg: #faf0ff;
+        --color-text: #1a001a;
+        --color-text-muted: #7744aa;
         --color-link: #006600;
         --color-link-hover: #003300;
-        --color-heading: #005c5c;
-        --color-prompt: #6b6b00;
-        --color-border: #cccccc;
-        --color-header-bg: #f5f5f5;
-        --color-footer-bg: #f5f5f5;
-        --color-category-bg: #ebebeb;
+        --color-heading: #cc00cc;
+        --color-prompt: #888800;
+        --color-border: #cc99dd;
+        --color-header-bg: #f0e0ff;
+        --color-footer-bg: #f0e0ff;
+        --color-category-bg: #ede0f8;
         --color-glow: transparent;
         --color-glow-strong: transparent;
         --color-scanline: rgba(0, 0, 0, 0.04);
@@ -271,8 +273,8 @@ header h1::after {
     border-bottom: 1px solid var(--color-border);
 }
 
-/* ASCII-style prompt prefix — uses ANSI yellow for the prompt character */
-.directory > .link::before {
+/* ASCII-style prompt prefix on all links — uses ANSI yellow for the prompt character */
+.directory .link::before {
     content: "  >> ";
     color: var(--color-prompt);
 }
@@ -306,27 +308,16 @@ header h1::after {
     background-color: var(--color-category-bg);
     border: 1px solid var(--color-border);
     box-shadow: 0 0 8px var(--color-glow), inset 0 0 16px rgba(0, 0, 0, 0.4);
-    position: relative;
 }
 
-/* Corner accent — uses ANSI yellow for the prompt-style decoration */
-.category::before {
-    content: "+--";
-    position: absolute;
-    top: -0.6rem;
-    left: 0.5rem;
-    background: var(--color-bg);
-    padding: 0 0.3rem;
-    color: var(--color-prompt);
-    font-size: 0.8rem;
-    text-shadow: none;
-}
-
+/* Category title bar — full-width header inside the box */
 .category h2 {
-    font-size: 1rem;
-    margin: 0 0 0.2rem;
+    margin: calc(-1 * var(--spacing)) calc(-1 * var(--spacing)) 0.75rem;
+    padding: 0.4rem var(--spacing);
+    font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--color-border);
 }
 
 /* Category headings use ANSI cyan for distinct coloring */
@@ -356,11 +347,6 @@ header h1::after {
     margin-top: 0.4rem;
 }
 
-/* Nested link prompt — uses ANSI yellow */
-.category ul .link::before {
-    content: "  |  ";
-    color: var(--color-prompt);
-}
 
 /* ------------------------------------------------------------------ */
 /* Footer                                                             */

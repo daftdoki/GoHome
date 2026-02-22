@@ -257,8 +257,8 @@ header h1::after {
     border-bottom: 1px solid var(--color-border);
 }
 
-/* ASCII-style prompt prefix on each link */
-.directory > .link::before {
+/* ASCII-style prompt prefix on all links */
+.directory .link::before {
     content: "  >> ";
     color: var(--color-text-muted);
 }
@@ -292,27 +292,16 @@ header h1::after {
     background-color: var(--color-category-bg);
     border: 1px solid var(--color-border);
     box-shadow: 0 0 8px var(--color-glow), inset 0 0 16px rgba(0, 0, 0, 0.4);
-    position: relative;
 }
 
-/* Corner accents to suggest ASCII box-drawing characters */
-.category::before {
-    content: "+--";
-    position: absolute;
-    top: -0.6rem;
-    left: 0.5rem;
-    background: var(--color-bg);
-    padding: 0 0.3rem;
-    color: var(--color-border);
-    font-size: 0.8rem;
-    text-shadow: none;
-}
-
+/* Category title bar — full-width header inside the box */
 .category h2 {
-    font-size: 1rem;
-    margin: 0 0 0.2rem;
+    margin: calc(-1 * var(--spacing)) calc(-1 * var(--spacing)) 0.75rem;
+    padding: 0.4rem var(--spacing);
+    font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .category h2 a {
@@ -341,11 +330,6 @@ header h1::after {
     margin-top: 0.4rem;
 }
 
-/* Nested link prompt */
-.category ul .link::before {
-    content: "  |  ";
-    color: var(--color-text-muted);
-}
 
 /* ------------------------------------------------------------------ */
 /* Footer                                                             */

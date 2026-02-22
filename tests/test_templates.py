@@ -74,10 +74,12 @@ class TestRootTemplate:
         html = client.get("/").get_data(as_text=True)
         assert 'value="default" selected' in html
 
-    def test_retro_theme_option_present(self, client: FlaskClient) -> None:
-        """The retro theme appears as an option in the dropdown."""
+    def test_retro_theme_options_present(self, client: FlaskClient) -> None:
+        """All three retro themes appear as options in the dropdown."""
         html = client.get("/").get_data(as_text=True)
-        assert 'value="retro"' in html
+        assert 'value="retro-green"' in html
+        assert 'value="retro-amber"' in html
+        assert 'value="retro-ansi"' in html
 
     def test_bundled_theme_served_from_static(self, client: FlaskClient) -> None:
         """Bundled themes are linked from the static endpoint, not /themes/."""

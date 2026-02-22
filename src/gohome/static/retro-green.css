@@ -1,17 +1,17 @@
-/* GoHome — Retro CRT Terminal Theme
+/* GoHome — Retro Green Phosphor CRT Theme
  *
- * A phosphor terminal aesthetic: monospaced font, scanline overlay,
+ * Classic green phosphor terminal aesthetic: monospaced font, scanline overlay,
  * glow effects, and a subtle screen flicker.
  *
- * Dark / default mode: green phosphor (classic VT100 green-screen)
- * Light mode:          amber phosphor (classic amber-screen terminal)
+ * Dark mode: green phosphor on near-black (classic VT100 green-screen)
+ * Light mode: dark green ink on pale green background
  *
  * Custom themes are fully self-contained and do not inherit from the
  * default theme.
  */
 
 /* ------------------------------------------------------------------ */
-/* Custom properties — green phosphor (dark, default)                 */
+/* Custom properties — dark mode (default)                            */
 /* ------------------------------------------------------------------ */
 :root {
     --color-bg: #050d05;
@@ -32,25 +32,25 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* Amber phosphor via .light body class                               */
+/* Light mode via .light body class                                   */
 /* ------------------------------------------------------------------ */
 body.light {
-    --color-bg: #0d0800;
-    --color-text: #ffb000;
-    --color-text-muted: #885800;
-    --color-link: #ffc830;
-    --color-link-hover: #ffffff;
-    --color-border: #664400;
-    --color-header-bg: #0d0800;
-    --color-footer-bg: #0d0800;
-    --color-category-bg: #0a0600;
-    --color-glow: rgba(255, 176, 0, 0.35);
-    --color-glow-strong: rgba(255, 200, 48, 0.6);
-    --color-scanline: rgba(0, 0, 0, 0.20);
+    --color-bg: #f0f7f0;
+    --color-text: #1a4d1a;
+    --color-text-muted: #3d7a3d;
+    --color-link: #006400;
+    --color-link-hover: #003000;
+    --color-border: #7ab87a;
+    --color-header-bg: #f0f7f0;
+    --color-footer-bg: #f0f7f0;
+    --color-category-bg: #e0f0e0;
+    --color-glow: transparent;
+    --color-glow-strong: transparent;
+    --color-scanline: rgba(0, 0, 0, 0.04);
 }
 
 /* ------------------------------------------------------------------ */
-/* Green phosphor via .dark body class (same as :root default)        */
+/* Dark mode via .dark body class (same as :root default)             */
 /* ------------------------------------------------------------------ */
 body.dark {
     --color-bg: #050d05;
@@ -72,18 +72,18 @@ body.dark {
 /* ------------------------------------------------------------------ */
 @media (prefers-color-scheme: light) {
     body:not(.light):not(.dark) {
-        --color-bg: #0d0800;
-        --color-text: #ffb000;
-        --color-text-muted: #885800;
-        --color-link: #ffc830;
-        --color-link-hover: #ffffff;
-        --color-border: #664400;
-        --color-header-bg: #0d0800;
-        --color-footer-bg: #0d0800;
-        --color-category-bg: #0a0600;
-        --color-glow: rgba(255, 176, 0, 0.35);
-        --color-glow-strong: rgba(255, 200, 48, 0.6);
-        --color-scanline: rgba(0, 0, 0, 0.20);
+        --color-bg: #f0f7f0;
+        --color-text: #1a4d1a;
+        --color-text-muted: #3d7a3d;
+        --color-link: #006400;
+        --color-link-hover: #003000;
+        --color-border: #7ab87a;
+        --color-header-bg: #f0f7f0;
+        --color-footer-bg: #f0f7f0;
+        --color-category-bg: #e0f0e0;
+        --color-glow: transparent;
+        --color-glow-strong: transparent;
+        --color-scanline: rgba(0, 0, 0, 0.04);
     }
 }
 

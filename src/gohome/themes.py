@@ -10,8 +10,20 @@ from __future__ import annotations
 
 from pathlib import Path
 
-BUNDLED_THEMES: tuple[str, ...] = ("default", "retro")
+BUNDLED_THEMES: tuple[str, ...] = (
+    "default",
+    "retro-green",
+    "retro-amber",
+    "retro-ansi",
+)
 """Names of themes shipped with GoHome, in display order.
+
+Bundled themes:
+
+- ``default``: clean light/dark theme
+- ``retro-green``: classic green phosphor CRT terminal
+- ``retro-amber``: classic amber phosphor CRT terminal
+- ``retro-ansi``: multi-color ANSI terminal palette
 
 These are served from the application's static directory.  Custom
 themes in the config directory cannot use these names.

@@ -18,9 +18,17 @@ class TestBundledThemes:
         """'default' is always a bundled theme."""
         assert "default" in BUNDLED_THEMES
 
-    def test_retro_is_bundled(self) -> None:
-        """'retro' is a bundled theme."""
-        assert "retro" in BUNDLED_THEMES
+    def test_retro_green_is_bundled(self) -> None:
+        """'retro-green' is a bundled theme."""
+        assert "retro-green" in BUNDLED_THEMES
+
+    def test_retro_amber_is_bundled(self) -> None:
+        """'retro-amber' is a bundled theme."""
+        assert "retro-amber" in BUNDLED_THEMES
+
+    def test_retro_ansi_is_bundled(self) -> None:
+        """'retro-ansi' is a bundled theme."""
+        assert "retro-ansi" in BUNDLED_THEMES
 
 
 class TestDiscoverThemes:
@@ -68,12 +76,12 @@ class TestDiscoverThemes:
         assert themes.count("default") == 1
 
     def test_custom_cannot_shadow_bundled(self, tmp_path: Path) -> None:
-        """A custom theme/retro.css cannot shadow the bundled retro theme."""
+        """A custom theme/retro-green.css cannot shadow the bundled retro-green theme."""
         themes_dir = tmp_path / "themes"
         themes_dir.mkdir()
-        (themes_dir / "retro.css").write_text("/* fake */", encoding="utf-8")
+        (themes_dir / "retro-green.css").write_text("/* fake */", encoding="utf-8")
         themes = discover_themes(str(tmp_path))
-        assert themes.count("retro") == 1
+        assert themes.count("retro-green") == 1
 
 
 class TestResolveTheme:
@@ -81,20 +89,25 @@ class TestResolveTheme:
 
     def test_requested_available(self) -> None:
         """An available requested theme is returned as-is."""
-        assert resolve_theme("nord", ["default", "retro", "nord"], "default") == "nord"
+        assert (
+            resolve_theme("nord", ["default", "retro-green", "nord"], "default")
+            == "nord"
+        )
 
     def test_requested_unavailable_falls_to_default(self) -> None:
         """An unavailable requested theme falls back to the admin default."""
-        assert resolve_theme("gone", ["default", "retro", "nord"], "nord") == "nord"
+        assert (
+            resolve_theme("gone", ["default", "retro-green", "nord"], "nord") == "nord"
+        )
 
     def test_both_unavailable_falls_to_builtin(self) -> None:
         """If both requested and admin default are gone, use 'default'."""
         assert resolve_theme("gone", ["default"], "also-gone") == "default"
 
-    def test_retro_resolves(self) -> None:
-        """The retro theme resolves when it is in the available list."""
+    def test_retro_green_resolves(self) -> None:
+        """The retro-green theme resolves when it is in the available list."""
         themes = list(BUNDLED_THEMES)
-        assert resolve_theme("retro", themes, "default") == "retro"
+        assert resolve_theme("retro-green", themes, "default") == "retro-green"
 
 
 class TestThemeCSSRoute:
@@ -106,9 +119,27 @@ class TestThemeCSSRoute:
         assert response.status_code == 200
         assert "text/css" in response.content_type
 
-    def test_bundled_retro_css_served_from_static(self, client: FlaskClient) -> None:
-        """The bundled retro theme is served from the static endpoint."""
-        response = client.get("/static/retro.css")
+    def test_bundled_retro_green_css_served_from_static(
+        self, client: FlaskClient
+    ) -> None:
+        """The bundled retro-green theme is served from the static endpoint."""
+        response = client.get("/static/retro-green.css")
+        assert response.status_code == 200
+        assert "text/css" in response.content_type
+
+    def test_bundled_retro_amber_css_served_from_static(
+        self, client: FlaskClient
+    ) -> None:
+        """The bundled retro-amber theme is served from the static endpoint."""
+        response = client.get("/static/retro-amber.css")
+        assert response.status_code == 200
+        assert "text/css" in response.content_type
+
+    def test_bundled_retro_ansi_css_served_from_static(
+        self, client: FlaskClient
+    ) -> None:
+        """The bundled retro-ansi theme is served from the static endpoint."""
+        response = client.get("/static/retro-ansi.css")
         assert response.status_code == 200
         assert "text/css" in response.content_type
 

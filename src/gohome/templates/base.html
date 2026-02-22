@@ -6,8 +6,8 @@
     <meta name="description" content="{{ site_title }} — link directory and redirector">
     <title>{% if page_title %}{{ site_title }} — {{ page_title }}{% else %}{{ site_title }}{% endif %}</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    {% if active_theme == 'default' %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='default.css') }}">
+    {% if active_theme in bundled_themes %}
+    <link rel="stylesheet" href="{{ url_for('static', filename=active_theme + '.css') }}">
     {% else %}
     <link rel="stylesheet" href="{{ url_for('serve_theme_css', theme_name=active_theme) }}">
     {% endif %}

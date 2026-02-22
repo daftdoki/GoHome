@@ -74,6 +74,16 @@ class TestRootTemplate:
         html = client.get("/").get_data(as_text=True)
         assert 'value="default" selected' in html
 
+    def test_retro_theme_option_present(self, client: FlaskClient) -> None:
+        """The retro theme appears as an option in the dropdown."""
+        html = client.get("/").get_data(as_text=True)
+        assert 'value="retro"' in html
+
+    def test_bundled_theme_served_from_static(self, client: FlaskClient) -> None:
+        """Bundled themes are linked from the static endpoint, not /themes/."""
+        html = client.get("/").get_data(as_text=True)
+        assert "/static/default.css" in html
+
 
 class TestCategoryTemplate:
     """Verify category page template rendering."""

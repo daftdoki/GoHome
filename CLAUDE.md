@@ -64,7 +64,7 @@ yamllint sample_config/ docker-compose.example.yml
   - `routes.py` — Flask route handlers
   - `themes.py` — Theme discovery
   - `templates/base.html` — Single Jinja2 template
-  - `static/` — Bundled CSS, JS, favicon
+  - `static/` — Bundled CSS (`default.css`, `retro.css`), JS, favicon
 - `tests/` — Test suite (pytest)
 - `docs/` — Documentation and requirements
 - `sample_config/` — Example configuration files
@@ -75,8 +75,13 @@ yamllint sample_config/ docker-compose.example.yml
   for O(1) path resolution
 - **Validation**: Config errors call `sys.exit(1)` — test with
   `pytest.raises(SystemExit)`
-- **Themes**: Default theme served via Flask static; custom themes served
-  via `/themes/<name>.css` route reading from config dir
+- **Themes**: Bundled themes (`BUNDLED_THEMES` in `themes.py`) are served
+  via Flask static as `<name>.css`; custom themes are served via
+  `/themes/<name>.css` reading from the config dir. The template uses
+  `bundled_themes` (a `frozenset`) to decide which URL to generate.
+  Custom themes cannot shadow bundled theme names.
+- **Adding a bundled theme**: copy the CSS to `src/gohome/static/` and
+  add the name to `BUNDLED_THEMES` in `themes.py`
 - **Cookies**: Server reads but never sets cookies; JS handles writes
 
 ## Coding Conventions

@@ -38,6 +38,7 @@ def register_routes(app: Flask) -> None:
         app_config: AppConfig = app.config["GOHOME_APP_CONFIG"]
         directory: Directory = app.config["GOHOME_DIRECTORY"]
         themes: list[str] = app.config["GOHOME_THEMES"]
+        bundled_themes: frozenset[str] = app.config["GOHOME_BUNDLED_THEMES"]
 
         active_theme, active_mode = _read_preferences(app_config, themes)
 
@@ -52,6 +53,7 @@ def register_routes(app: Flask) -> None:
             active_theme=active_theme,
             active_mode=active_mode,
             default_theme=app_config.default_theme,
+            bundled_themes=bundled_themes,
         )
 
     @app.route("/<path:path>")
@@ -85,6 +87,7 @@ def register_routes(app: Flask) -> None:
             return redirect(item.url, code=302)
 
         # CategoryEntry — render the category page
+        bundled_themes: frozenset[str] = app.config["GOHOME_BUNDLED_THEMES"]
         active_theme, active_mode = _read_preferences(app_config, themes)
 
         return render_template(
@@ -98,6 +101,7 @@ def register_routes(app: Flask) -> None:
             active_theme=active_theme,
             active_mode=active_mode,
             default_theme=app_config.default_theme,
+            bundled_themes=bundled_themes,
         )
 
     def _read_preferences(app_config: AppConfig, themes: list[str]) -> tuple[str, str]:

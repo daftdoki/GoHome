@@ -54,10 +54,9 @@ Append a category name to see only that section:
 Use the footer controls to:
 
 - **Switch themes** via the dropdown (persisted in a cookie)
-- **Toggle light/dark mode** via the button (persisted in a cookie)
-
-On first visit, the browser's `prefers-color-scheme` setting determines
-light or dark mode automatically.
+- **Set light/dark/auto mode** via the Mode dropdown (persisted in a
+  cookie); Auto follows the browser's `prefers-color-scheme` setting and
+  is the default for all themes
 
 ## Administrator Guide
 
@@ -211,7 +210,10 @@ src/gohome/
 ├── templates/
 │   └── base.html    # Single Jinja2 template
 └── static/
-    ├── default.css  # Bundled default theme
-    ├── favicon.ico  # Favicon
-    └── gohome.js    # Client-side theme/mode JS
+    ├── default.css      # Bundled default theme
+    ├── retro-green.css  # Bundled retro green phosphor theme
+    ├── retro-amber.css  # Bundled retro amber phosphor theme
+    ├── retro-ansi.css   # Bundled retro ANSI/arcade theme
+    ├── favicon.ico      # Favicon
+    └── gohome.js        # Client-side theme/mode JS
 ```

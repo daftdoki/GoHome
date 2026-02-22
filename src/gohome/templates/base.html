@@ -6,8 +6,8 @@
     <meta name="description" content="{{ site_title }} — link directory and redirector">
     <title>{% if page_title %}{{ site_title }} — {{ page_title }}{% else %}{{ site_title }}{% endif %}</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    {% if active_theme == 'default' %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='default.css') }}">
+    {% if active_theme in bundled_themes %}
+    <link rel="stylesheet" href="{{ url_for('static', filename=active_theme + '.css') }}">
     {% else %}
     <link rel="stylesheet" href="{{ url_for('serve_theme_css', theme_name=active_theme) }}">
     {% endif %}
@@ -73,9 +73,12 @@
                 <option value="{{ theme }}"{% if theme == active_theme %} selected{% endif %}>{{ theme }}</option>
                 {% endfor %}
             </select>
-            <button id="mode-toggle" type="button">
-                {% if active_mode == 'dark' %}Light{% elif active_mode == 'light' %}Dark{% else %}Toggle Mode{% endif %}
-            </button>
+            <label for="mode-select">Mode:</label>
+            <select id="mode-select">
+                <option value=""{% if active_mode == '' %} selected{% endif %}>Auto</option>
+                <option value="light"{% if active_mode == 'light' %} selected{% endif %}>Light</option>
+                <option value="dark"{% if active_mode == 'dark' %} selected{% endif %}>Dark</option>
+            </select>
         </div>
     </footer>
 

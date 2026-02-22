@@ -24,6 +24,14 @@
             ";SameSite=Lax";
     }
 
+    /**
+     * Delete a cookie by setting its max-age to 0.
+     * @param {string} name - Cookie name.
+     */
+    function deleteCookie(name) {
+        document.cookie = name + "=;path=/;max-age=0;SameSite=Lax";
+    }
+
     /* ------------------------------------------------------------------ */
     /* Theme selector                                                     */
     /* ------------------------------------------------------------------ */
@@ -36,52 +44,18 @@
     }
 
     /* ------------------------------------------------------------------ */
-    /* Mode toggle                                                        */
+    /* Mode selector                                                      */
     /* ------------------------------------------------------------------ */
-    var modeToggle = document.getElementById("mode-toggle");
-    var body = document.body;
-
-    /**
-     * Update the toggle button text to show the opposite mode.
-     */
-    function updateButtonText() {
-        if (!modeToggle) return;
-        if (body.classList.contains("dark")) {
-            modeToggle.textContent = "Light";
-        } else if (body.classList.contains("light")) {
-            modeToggle.textContent = "Dark";
-        } else {
-            modeToggle.textContent = "Toggle Mode";
-        }
-    }
-
-    if (modeToggle) {
-        modeToggle.addEventListener("click", function () {
-            var currentMode;
-            if (body.classList.contains("dark")) {
-                currentMode = "dark";
-            } else if (body.classList.contains("light")) {
-                currentMode = "light";
+    var modeSelect = document.getElementById("mode-select");
+    if (modeSelect) {
+        modeSelect.addEventListener("change", function () {
+            var newMode = modeSelect.value;
+            if (newMode === "") {
+                deleteCookie("gohome_mode");
             } else {
-                /* No class set — detect browser preference */
-                if (
-                    window.matchMedia &&
-                    window.matchMedia("(prefers-color-scheme: dark)").matches
-                ) {
-                    currentMode = "dark";
-                } else {
-                    currentMode = "light";
-                }
+                setCookie("gohome_mode", newMode);
             }
-
-            /* Toggle to the opposite mode */
-            var newMode = currentMode === "dark" ? "light" : "dark";
-            body.classList.remove("light", "dark");
-            body.classList.add(newMode);
-            setCookie("gohome_mode", newMode);
-            updateButtonText();
+            window.location.reload();
         });
     }
-
-    updateButtonText();
 })();

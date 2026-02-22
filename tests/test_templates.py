@@ -64,15 +64,27 @@ class TestRootTemplate:
         html = client.get("/").get_data(as_text=True)
         assert 'id="theme-select"' in html
 
-    def test_mode_toggle_in_footer(self, client: FlaskClient) -> None:
-        """The footer contains a mode toggle button."""
+    def test_mode_select_in_footer(self, client: FlaskClient) -> None:
+        """The footer contains a mode select dropdown."""
         html = client.get("/").get_data(as_text=True)
-        assert 'id="mode-toggle"' in html
+        assert 'id="mode-select"' in html
 
     def test_default_theme_selected(self, client: FlaskClient) -> None:
         """The default theme is pre-selected in the dropdown."""
         html = client.get("/").get_data(as_text=True)
         assert 'value="default" selected' in html
+
+    def test_retro_theme_options_present(self, client: FlaskClient) -> None:
+        """All three retro themes appear as options in the dropdown."""
+        html = client.get("/").get_data(as_text=True)
+        assert 'value="retro-green"' in html
+        assert 'value="retro-amber"' in html
+        assert 'value="retro-ansi"' in html
+
+    def test_bundled_theme_served_from_static(self, client: FlaskClient) -> None:
+        """Bundled themes are linked from the static endpoint, not /themes/."""
+        html = client.get("/").get_data(as_text=True)
+        assert "/static/default.css" in html
 
 
 class TestCategoryTemplate:

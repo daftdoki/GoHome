@@ -17,7 +17,7 @@ from flask import Flask
 from gohome.config import load_app_config, load_directory
 from gohome.models import AppConfig, CategoryEntry, Directory
 from gohome.routes import register_routes
-from gohome.themes import discover_themes
+from gohome.themes import BUNDLED_THEMES, discover_themes
 
 
 def create_app(config_dir: str = ".") -> Flask:
@@ -44,10 +44,11 @@ def create_app(config_dir: str = ".") -> Flask:
 
     app = Flask(__name__)
 
-    # Store config, directory, and themes on the app for access in routes
+    # Store config, directory, themes, and bundled theme set for route access
     app.config["GOHOME_APP_CONFIG"] = app_config
     app.config["GOHOME_DIRECTORY"] = directory
     app.config["GOHOME_THEMES"] = themes
+    app.config["GOHOME_BUNDLED_THEMES"] = frozenset(BUNDLED_THEMES)
 
     # Register custom Jinja2 test: {% if item is category %}
     def _is_category(value: Any) -> bool:

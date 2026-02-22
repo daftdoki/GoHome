@@ -25,6 +25,11 @@ class TestNoCookies:
         html = client.get("/").get_data(as_text=True)
         assert 'value="default" selected' in html
 
+    def test_auto_mode_selected_by_default(self, client: FlaskClient) -> None:
+        """Without a mode cookie, the Auto option is selected in the mode dropdown."""
+        html = client.get("/").get_data(as_text=True)
+        assert 'value="" selected' in html
+
 
 class TestModeCookie:
     """Verify that the gohome_mode cookie controls the body class."""

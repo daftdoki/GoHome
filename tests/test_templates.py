@@ -64,10 +64,10 @@ class TestRootTemplate:
         html = client.get("/").get_data(as_text=True)
         assert 'id="theme-select"' in html
 
-    def test_mode_toggle_in_footer(self, client: FlaskClient) -> None:
-        """The footer contains a mode toggle button."""
+    def test_mode_select_in_footer(self, client: FlaskClient) -> None:
+        """The footer contains a mode select dropdown."""
         html = client.get("/").get_data(as_text=True)
-        assert 'id="mode-toggle"' in html
+        assert 'id="mode-select"' in html
 
     def test_default_theme_selected(self, client: FlaskClient) -> None:
         """The default theme is pre-selected in the dropdown."""

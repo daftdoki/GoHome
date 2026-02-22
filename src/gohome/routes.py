@@ -1,16 +1,20 @@
 """Flask route handlers for the GoHome application.
 
 Defines the root directory page, slug-based redirects and category
-pages, and a ``Cache-Control: no-cache`` hook for HTML responses.
+pages, custom theme CSS serving, and a ``Cache-Control: no-cache`` hook
+for HTML responses.
 """
 
 from __future__ import annotations
 
-import werkzeug
-from flask import Flask, Response, redirect
+from pathlib import Path
 
-from gohome.models import AppConfig, CategoryEntry, Directory, LinkEntry
+import werkzeug
+from flask import Flask, Response, abort, redirect, render_template
+
+from gohome.models import AppConfig, Directory, LinkEntry
 from gohome.normalize import normalize_name
+from gohome.themes import resolve_theme
 
 
 def register_routes(app: Flask) -> None:
@@ -33,8 +37,23 @@ def register_routes(app: Flask) -> None:
         """Render the full link directory page."""
         app_config: AppConfig = app.config["GOHOME_APP_CONFIG"]
         directory: Directory = app.config["GOHOME_DIRECTORY"]
+        themes: list[str] = app.config["GOHOME_THEMES"]
 
-        return _render_directory(app_config, directory)
+        active_theme = resolve_theme(app_config.default_theme, themes, "default")
+        active_mode = ""
+
+        return render_template(
+            "base.html",
+            site_title=app_config.site_title,
+            page_title=None,
+            page_description=None,
+            items=directory.items,
+            breadcrumbs=[("Home", None)],
+            themes=themes,
+            active_theme=active_theme,
+            active_mode=active_mode,
+            default_theme=app_config.default_theme,
+        )
 
     @app.route("/<path:path>")
     def resolve_path(path: str) -> werkzeug.wrappers.Response | str:
@@ -56,6 +75,7 @@ def register_routes(app: Flask) -> None:
 
         app_config: AppConfig = app.config["GOHOME_APP_CONFIG"]
         directory: Directory = app.config["GOHOME_DIRECTORY"]
+        themes: list[str] = app.config["GOHOME_THEMES"]
         slug = normalize_name(path)
         item = directory.slug_map.get(slug)
 
@@ -66,100 +86,37 @@ def register_routes(app: Flask) -> None:
             return redirect(item.url, code=302)
 
         # CategoryEntry — render the category page
-        return _render_category(app_config, directory, item)
+        active_theme = resolve_theme(app_config.default_theme, themes, "default")
+        active_mode = ""
 
-    def _render_directory(app_config: AppConfig, directory: Directory) -> str:
-        """Render the root directory page as simple HTML.
+        return render_template(
+            "base.html",
+            site_title=app_config.site_title,
+            page_title=item.name,
+            page_description=item.description,
+            items=item.entries,
+            breadcrumbs=[("Home", "/"), (item.name, None)],
+            themes=themes,
+            active_theme=active_theme,
+            active_mode=active_mode,
+            default_theme=app_config.default_theme,
+        )
 
-        Args:
-            app_config: Application configuration.
-            directory: The link directory.
-
-        Returns:
-            HTML string for the root page.
-        """
-        lines = [
-            "<!DOCTYPE html>",
-            "<html><head>",
-            f"<title>{app_config.site_title}</title>",
-            '<meta charset="utf-8">',
-            '<meta name="viewport" content="width=device-width, initial-scale=1">',
-            "</head><body>",
-            f"<h1>{app_config.site_title}</h1>",
-            "<nav>Home</nav>",
-            '<ul class="directory">',
-        ]
-        for item in directory.items:
-            if isinstance(item, CategoryEntry):
-                desc = (
-                    f' <span class="description">{item.description}</span>'
-                    if item.description
-                    else ""
-                )
-                lines.append(f'<li class="category"><h2>{item.name}</h2>{desc}<ul>')
-                for link in item.entries:
-                    link_desc = (
-                        f' <span class="description">{link.description}</span>'
-                        if link.description
-                        else ""
-                    )
-                    lines.append(
-                        f'<li class="link"><a href="{link.url}">{link.name}'
-                        f"</a>{link_desc}</li>"
-                    )
-                lines.append("</ul></li>")
-            else:
-                desc = (
-                    f' <span class="description">{item.description}</span>'
-                    if item.description
-                    else ""
-                )
-                lines.append(
-                    f'<li class="link"><a href="{item.url}">{item.name}</a>{desc}</li>'
-                )
-        lines.append("</ul>")
-        lines.append("</body></html>")
-        return "\n".join(lines)
-
-    def _render_category(
-        app_config: AppConfig,
-        directory: Directory,
-        category: CategoryEntry,
-    ) -> str:
-        """Render a category page as simple HTML.
+    @app.route("/themes/<theme_name>.css")
+    def serve_theme_css(theme_name: str) -> Response:
+        """Serve a custom theme CSS file from the config directory.
 
         Args:
-            app_config: Application configuration.
-            directory: The link directory (unused here but kept for symmetry).
-            category: The category to render.
+            theme_name: The theme name (without ``.css`` extension).
 
         Returns:
-            HTML string for the category page.
+            The CSS file contents with ``text/css`` content type.
         """
-        _ = directory  # kept for future use
-        lines = [
-            "<!DOCTYPE html>",
-            "<html><head>",
-            f"<title>{app_config.site_title} — {category.name}</title>",
-            '<meta charset="utf-8">',
-            '<meta name="viewport" content="width=device-width, initial-scale=1">',
-            "</head><body>",
-            f"<h1>{app_config.site_title}</h1>",
-            f'<nav><a href="/">Home</a> &gt; {category.name}</nav>',
-            f"<h2>{category.name}</h2>",
-        ]
-        if category.description:
-            lines.append(f'<p class="description">{category.description}</p>')
-        lines.append('<ul class="directory">')
-        for link in category.entries:
-            desc = (
-                f' <span class="description">{link.description}</span>'
-                if link.description
-                else ""
-            )
-            lines.append(
-                f'<li class="link"><a href="{link.url}">{link.name}</a>{desc}</li>'
-            )
-        lines.append("</ul>")
-        lines.append("</body></html>")
-        return "\n".join(lines)
+        app_config: AppConfig = app.config["GOHOME_APP_CONFIG"]
+        css_path = Path(app_config.config_dir) / "themes" / f"{theme_name}.css"
+        if not css_path.is_file():
+            abort(404)
+        return Response(
+            css_path.read_text(encoding="utf-8"),
+            mimetype="text/css",
+        )

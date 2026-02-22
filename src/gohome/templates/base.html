@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{{ site_title }} — link directory and redirector">
+    <title>{% if page_title %}{{ site_title }} — {{ page_title }}{% else %}{{ site_title }}{% endif %}</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    {% if active_theme == 'default' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='default.css') }}">
+    {% else %}
+    <link rel="stylesheet" href="{{ url_for('serve_theme_css', theme_name=active_theme) }}">
+    {% endif %}
+</head>
+<body class="{{ active_mode }}">
+    <header>
+        <h1>{{ site_title }}</h1>
+        <nav class="breadcrumbs">
+            {% for label, url in breadcrumbs %}
+                {% if not loop.last %}
+                    <a href="{{ url }}">{{ label }}</a> &gt;
+                {% else %}
+                    <span>{{ label }}</span>
+                {% endif %}
+            {% endfor %}
+        </nav>
+    </header>
+
+    <main>
+        {% if page_title %}
+        <h2>{{ page_title }}</h2>
+        {% if page_description %}
+        <p class="category-description">{{ page_description }}</p>
+        {% endif %}
+        {% endif %}
+
+        <ul class="directory">
+        {% for item in items %}
+            {% if item is category %}
+            <li class="category">
+                <h2><a href="/{{ item.slug }}">{{ item.name }}</a></h2>
+                {% if item.description %}
+                <p class="category-description">{{ item.description }}</p>
+                {% endif %}
+                <ul>
+                {% for link in item.entries %}
+                    <li class="link">
+                        <a href="{{ link.url }}">{{ link.name }}</a>
+                        {% if link.description %}
+                        <span class="description">{{ link.description }}</span>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+                </ul>
+            </li>
+            {% else %}
+            <li class="link">
+                <a href="{{ item.url }}">{{ item.name }}</a>
+                {% if item.description %}
+                <span class="description">{{ item.description }}</span>
+                {% endif %}
+            </li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    </main>
+
+    <footer>
+        <div class="controls">
+            <label for="theme-select">Theme:</label>
+            <select id="theme-select">
+                {% for theme in themes %}
+                <option value="{{ theme }}"{% if theme == active_theme %} selected{% endif %}>{{ theme }}</option>
+                {% endfor %}
+            </select>
+            <button id="mode-toggle" type="button">
+                {% if active_mode == 'dark' %}Light{% elif active_mode == 'light' %}Dark{% else %}Toggle Mode{% endif %}
+            </button>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='gohome.js') }}"></script>
+</body>
+</html>

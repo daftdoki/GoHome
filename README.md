@@ -24,6 +24,20 @@ uv sync --all-extras
 uv run python -m gohome sample_config/
 ```
 
+## Screenshots
+
+### Default Theme
+
+| Light | Dark |
+| --- | --- |
+| ![Default theme, light mode](docs/screenshots/default-light.png) | ![Default theme, dark mode](docs/screenshots/default-dark.png) |
+
+### Retro Themes
+
+| Retro Green | Retro Amber | Retro ANSI |
+| --- | --- | --- |
+| ![Retro green phosphor theme](docs/screenshots/retro-green.png) | ![Retro amber phosphor theme](docs/screenshots/retro-amber.png) | ![Retro ANSI terminal theme](docs/screenshots/retro-ansi.png) |
+
 ## User Guide
 
 ### Browsing the Directory
@@ -188,8 +202,8 @@ uv run pytest tests/test_integration.py -v  # Integration tests only
 All checks must pass before committing:
 
 ```bash
-uv run ruff format src/ tests/
-uv run ruff check --fix src/ tests/
+uv run ruff format src/ tests/ scripts/
+uv run ruff check --fix src/ tests/ scripts/
 uv run mypy src/
 uv run pytest
 markdownlint-cli2 "**/*.md"

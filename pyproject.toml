@@ -16,6 +16,9 @@ dev = [
     "types-PyYAML>=6.0",
     "types-Flask>=1.1",
 ]
+screenshots = [
+    "playwright>=1.40",
+]
 
 [build-system]
 requires = ["hatchling"]

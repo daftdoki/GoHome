@@ -56,8 +56,10 @@ We will consider three different personas in our stories. These personas are:
 - I want to see a common header and footer on each rendered page.
   - The header should show me navigation crumbs that I can use to go back
     up a sub-section or return to the main page. The format uses `>` as
-    the separator (e.g., "Home > Streaming"). "Home" links to the root
-    page; the current page name is plain text (not a link).
+    the separator (e.g., "Home > Streaming"). On the root page, only
+    "Home" is displayed as plain text (no link). On sub-section pages,
+    "Home" links to the root page and the current section name is plain
+    text (not a link).
   - The browser tab title (`<title>` tag) shows the `site_title` on the
     root page. On sub-section pages it uses the format
     `"SiteTitle — SectionName"` (e.g., `"GoHome — Streaming"`).
@@ -115,6 +117,11 @@ We will consider three different personas in our stories. These personas are:
   provided via themes. JavaScript is limited to theme toggling, mode
   switching, and cookie management — no other client-side behavior.
 - All code will:
+  - Be well commented. Each function, class, module, or otherwise should
+    be documented idiomatically for the language so that code documentation
+    can be generated from it. It should explain to the human reader what it
+    does and how to use it. It shouldn't be overly verbose, but also not so
+    succint that it isn't useful.
   - be appropriately tested with a robust test suite using pytest as the test framework.
   - Focus on thoroughly testing interfaces, not just on code coverage.
   - Frontend JavaScript will not have its own test suite. JS behavior (theme
@@ -145,14 +152,17 @@ We will consider three different personas in our stories. These personas are:
 - The service will be configured by a yaml file called config.yml
 - The directory of links will be defined in a yaml file called
   directory.yml (See: Example directory.yml)
-- End user and administrator documentation should be kept up to date in the
-  README.md file in the root of the repository. Programmer / Developer
-  documentation for how to setup a build environment, contribute, build,
-  and test the application should also be present in the README.md. This
-  file should have examples where appropriate.
+- A `README.md` in the repository root must be maintained as the primary
+  human-facing documentation. It must contain or link to documentation for
+  users (how to use the web interface), administrators (how to configure and
+  deploy the service), and developers (how to set up a build environment,
+  contribute, build, and test). It must be kept up to date as the project
+  evolves and should include examples where appropriate.
 - Claude Code will be used to assist in development. A CLAUDE.md file
   should be maintained in the root of the repository with information
-  necessary for Claude when working on this repository.
+  necessary for Claude when working on this repository. CLAUDE.md must
+  be kept accurate and up to date as the project evolves — update it
+  in the same commit as any change that affects its content.
 - When Claude troubleshoots and fixes problems, it will update a file in
   docs/troubleshooting.md that records the problem, its solution, and the
   troubleshooting steps used to diagnose and fix the problem.
@@ -313,10 +323,11 @@ directory page.
 
 ### Docker
 
-The application targets Python 3.13 and uses `python:3.13-slim` as the
-Docker base image. The Docker container runs Flask's built-in development
-server. The host and port the application binds to are resolved using the
-following priority order: environment variables (`GOHOME_HOST` /
+The application targets Python 3.14 (currently 3.14.3) and uses
+`python:3.14-slim` as the Docker base image. The Docker container runs
+Flask's built-in development server. The host and port the application
+binds to are resolved using the following priority order: environment
+variables (`GOHOME_HOST` /
 `GOHOME_PORT`) take precedence over `config.yml` values, which take
 precedence over built-in defaults (`0.0.0.0` / `8080`). The Dockerfile
 sets `GOHOME_HOST=0.0.0.0` and `GOHOME_PORT=8080` so that the container

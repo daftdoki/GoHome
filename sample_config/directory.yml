@@ -1,0 +1,33 @@
+---
+directory:
+  - name: Google
+    url: https://google.com
+    description: The world's most popular search engine
+
+  - name: Wikipedia
+    url: https://wikipedia.org
+    description: The free encyclopedia
+
+  - name: Streaming
+    description: A category for streaming services
+    entries:
+      - name: Netflix
+        url: https://netflix.com
+        description: Movies and TV shows on demand
+      - name: YouTube
+        url: https://youtube.com
+        description: Free video sharing platform
+
+  - name: Kagi
+    url: https://kagi.com
+    description: A premium search engine focused on quality results
+
+  - name: Development
+    description: Tools and resources for software development
+    entries:
+      - name: GitHub
+        url: https://github.com
+        description: Code hosting and collaboration platform
+      - name: Stack Overflow
+        url: https://stackoverflow.com
+        description: Q&A for programmers

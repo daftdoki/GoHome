@@ -1,0 +1,8 @@
+---
+services:
+  gohome:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./sample_config:/config:ro

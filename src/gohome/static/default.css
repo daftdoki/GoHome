@@ -1,0 +1,254 @@
+/* GoHome — Default Theme
+ *
+ * A clean, minimal theme using CSS custom properties for light/dark mode.
+ * Light and dark variants are toggled via .light / .dark body classes.
+ * Falls back to prefers-color-scheme when no class is set.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Custom properties — light mode (default)                           */
+/* ------------------------------------------------------------------ */
+:root {
+    --color-bg: #ffffff;
+    --color-text: #1a1a1a;
+    --color-text-muted: #666666;
+    --color-link: #0066cc;
+    --color-link-hover: #004499;
+    --color-border: #e0e0e0;
+    --color-header-bg: #f8f8f8;
+    --color-footer-bg: #f8f8f8;
+    --color-category-bg: #fafafa;
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif;
+    --max-width: 48rem;
+    --spacing: 1rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Dark mode via body class                                           */
+/* ------------------------------------------------------------------ */
+body.dark {
+    --color-bg: #1a1a1a;
+    --color-text: #e0e0e0;
+    --color-text-muted: #999999;
+    --color-link: #66aaff;
+    --color-link-hover: #88ccff;
+    --color-border: #333333;
+    --color-header-bg: #222222;
+    --color-footer-bg: #222222;
+    --color-category-bg: #242424;
+}
+
+/* ------------------------------------------------------------------ */
+/* Light mode via body class (explicit)                               */
+/* ------------------------------------------------------------------ */
+body.light {
+    --color-bg: #ffffff;
+    --color-text: #1a1a1a;
+    --color-text-muted: #666666;
+    --color-link: #0066cc;
+    --color-link-hover: #004499;
+    --color-border: #e0e0e0;
+    --color-header-bg: #f8f8f8;
+    --color-footer-bg: #f8f8f8;
+    --color-category-bg: #fafafa;
+}
+
+/* ------------------------------------------------------------------ */
+/* Browser preference fallback (no class on body)                     */
+/* ------------------------------------------------------------------ */
+@media (prefers-color-scheme: dark) {
+    body:not(.light):not(.dark) {
+        --color-bg: #1a1a1a;
+        --color-text: #e0e0e0;
+        --color-text-muted: #999999;
+        --color-link: #66aaff;
+        --color-link-hover: #88ccff;
+        --color-border: #333333;
+        --color-header-bg: #222222;
+        --color-footer-bg: #222222;
+        --color-category-bg: #242424;
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* Base styles                                                        */
+/* ------------------------------------------------------------------ */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.6;
+}
+
+/* ------------------------------------------------------------------ */
+/* Layout                                                             */
+/* ------------------------------------------------------------------ */
+header,
+main,
+footer {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--spacing);
+}
+
+header {
+    background-color: var(--color-header-bg);
+    border-bottom: 1px solid var(--color-border);
+    max-width: 100%;
+    margin-bottom: var(--spacing);
+}
+
+header h1,
+header nav {
+    max-width: var(--max-width);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+header h1 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.5rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Breadcrumbs                                                        */
+/* ------------------------------------------------------------------ */
+.breadcrumbs {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.breadcrumbs a {
+    color: var(--color-link);
+    text-decoration: none;
+}
+
+.breadcrumbs a:hover {
+    text-decoration: underline;
+}
+
+/* ------------------------------------------------------------------ */
+/* Directory listing                                                  */
+/* ------------------------------------------------------------------ */
+.directory {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.directory .link {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.directory .link a {
+    color: var(--color-link);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.directory .link a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+}
+
+.description {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    margin-top: 0.125rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Categories                                                         */
+/* ------------------------------------------------------------------ */
+.category {
+    margin-bottom: var(--spacing);
+    padding: var(--spacing);
+    background-color: var(--color-category-bg);
+    border-radius: 0.375rem;
+    border: 1px solid var(--color-border);
+}
+
+.category h2 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.125rem;
+}
+
+.category h2 a {
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+.category h2 a:hover {
+    color: var(--color-link);
+}
+
+.category-description {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    margin: 0 0 0.5rem 0;
+}
+
+.category ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Footer                                                             */
+/* ------------------------------------------------------------------ */
+footer {
+    margin-top: calc(var(--spacing) * 2);
+    padding-top: var(--spacing);
+    border-top: 1px solid var(--color-border);
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.controls label {
+    color: var(--color-text-muted);
+}
+
+.controls select,
+.controls button {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.25rem;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    cursor: pointer;
+}
+
+.controls button:hover {
+    background-color: var(--color-header-bg);
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive                                                         */
+/* ------------------------------------------------------------------ */
+@media (max-width: 640px) {
+    header h1 {
+        font-size: 1.25rem;
+    }
+
+    .category {
+        padding: 0.75rem;
+    }
+}

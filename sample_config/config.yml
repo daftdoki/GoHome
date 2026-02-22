@@ -1,0 +1,16 @@
+---
+# GoHome sample configuration
+# All settings are optional — defaults are shown below.
+
+# The site title displayed in the header and browser tab
+site_title: "GoHome"
+
+# The address and port the service listens on
+# host: "0.0.0.0"
+# port: 8080
+
+# Log level for terminal output (debug, info, warning, error)
+# log_level: "info"
+
+# The default theme for users who haven't set a preference
+# default_theme: "default"

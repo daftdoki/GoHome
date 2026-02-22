@@ -64,7 +64,8 @@ yamllint sample_config/ docker-compose.example.yml
   - `routes.py` — Flask route handlers
   - `themes.py` — Theme discovery
   - `templates/base.html` — Single Jinja2 template
-  - `static/` — Bundled CSS (`default.css`, `retro.css`), JS, favicon
+  - `static/` — Bundled CSS (`default.css`, `retro-green.css`,
+    `retro-amber.css`, `retro-ansi.css`), JS, favicon
 - `tests/` — Test suite (pytest)
 - `docs/` — Documentation and requirements
 - `sample_config/` — Example configuration files

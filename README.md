@@ -32,11 +32,23 @@ uv run python -m gohome sample_config/
 | --- | --- |
 | ![Default theme, light mode](docs/screenshots/default-light.png) | ![Default theme, dark mode](docs/screenshots/default-dark.png) |
 
-### Retro Themes
+### Retro Green Theme
 
-| Retro Green | Retro Amber | Retro ANSI |
-| --- | --- | --- |
-| ![Retro green phosphor theme](docs/screenshots/retro-green.png) | ![Retro amber phosphor theme](docs/screenshots/retro-amber.png) | ![Retro ANSI terminal theme](docs/screenshots/retro-ansi.png) |
+| Light | Dark |
+| --- | --- |
+| ![Retro green phosphor theme, light mode](docs/screenshots/retro-green-light.png) | ![Retro green phosphor theme, dark mode](docs/screenshots/retro-green-dark.png) |
+
+### Retro Amber Theme
+
+| Light | Dark |
+| --- | --- |
+| ![Retro amber phosphor theme, light mode](docs/screenshots/retro-amber-light.png) | ![Retro amber phosphor theme, dark mode](docs/screenshots/retro-amber-dark.png) |
+
+### Retro ANSI Theme
+
+| Light | Dark |
+| --- | --- |
+| ![Retro ANSI terminal theme, light mode](docs/screenshots/retro-ansi-light.png) | ![Retro ANSI terminal theme, dark mode](docs/screenshots/retro-ansi-dark.png) |
 
 ## User Guide
 

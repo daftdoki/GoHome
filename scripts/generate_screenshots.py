@@ -60,9 +60,30 @@ SCREENSHOTS: list[ScreenshotSpec] = [
         "default-light.png", "default", "light", "Default theme, light mode"
     ),
     ScreenshotSpec("default-dark.png", "default", "dark", "Default theme, dark mode"),
-    ScreenshotSpec("retro-green.png", "retro-green", "dark", "Retro green phosphor"),
-    ScreenshotSpec("retro-amber.png", "retro-amber", "dark", "Retro amber phosphor"),
-    ScreenshotSpec("retro-ansi.png", "retro-ansi", "dark", "Retro ANSI terminal"),
+    ScreenshotSpec(
+        "retro-green-light.png",
+        "retro-green",
+        "light",
+        "Retro green phosphor, light mode",
+    ),
+    ScreenshotSpec(
+        "retro-green-dark.png", "retro-green", "dark", "Retro green phosphor, dark mode"
+    ),
+    ScreenshotSpec(
+        "retro-amber-light.png",
+        "retro-amber",
+        "light",
+        "Retro amber phosphor, light mode",
+    ),
+    ScreenshotSpec(
+        "retro-amber-dark.png", "retro-amber", "dark", "Retro amber phosphor, dark mode"
+    ),
+    ScreenshotSpec(
+        "retro-ansi-light.png", "retro-ansi", "light", "Retro ANSI terminal, light mode"
+    ),
+    ScreenshotSpec(
+        "retro-ansi-dark.png", "retro-ansi", "dark", "Retro ANSI terminal, dark mode"
+    ),
 ]
 
 

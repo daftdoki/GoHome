@@ -10,7 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import werkzeug
-from flask import Flask, Response, abort, redirect, render_template
+from flask import Flask, Response, abort, redirect, render_template, request
 
 from gohome.models import AppConfig, Directory, LinkEntry
 from gohome.normalize import normalize_name
@@ -39,8 +39,7 @@ def register_routes(app: Flask) -> None:
         directory: Directory = app.config["GOHOME_DIRECTORY"]
         themes: list[str] = app.config["GOHOME_THEMES"]
 
-        active_theme = resolve_theme(app_config.default_theme, themes, "default")
-        active_mode = ""
+        active_theme, active_mode = _read_preferences(app_config, themes)
 
         return render_template(
             "base.html",
@@ -86,8 +85,7 @@ def register_routes(app: Flask) -> None:
             return redirect(item.url, code=302)
 
         # CategoryEntry — render the category page
-        active_theme = resolve_theme(app_config.default_theme, themes, "default")
-        active_mode = ""
+        active_theme, active_mode = _read_preferences(app_config, themes)
 
         return render_template(
             "base.html",
@@ -101,6 +99,32 @@ def register_routes(app: Flask) -> None:
             active_mode=active_mode,
             default_theme=app_config.default_theme,
         )
+
+    def _read_preferences(app_config: AppConfig, themes: list[str]) -> tuple[str, str]:
+        """Read theme and mode preferences from cookies.
+
+        Falls back to the admin's default theme if the cookie references
+        a removed theme.  Returns an empty mode string when no cookie is
+        set (letting the browser's ``prefers-color-scheme`` decide).
+
+        Args:
+            app_config: Application configuration.
+            themes: Available theme names.
+
+        Returns:
+            A ``(active_theme, active_mode)`` tuple.
+        """
+        cookie_theme = request.cookies.get("gohome_theme", "")
+        cookie_mode = request.cookies.get("gohome_mode", "")
+
+        active_theme = resolve_theme(
+            cookie_theme if cookie_theme else app_config.default_theme,
+            themes,
+            app_config.default_theme,
+        )
+        active_mode = cookie_mode if cookie_mode in ("light", "dark") else ""
+
+        return active_theme, active_mode
 
     @app.route("/themes/<theme_name>.css")
     def serve_theme_css(theme_name: str) -> Response:

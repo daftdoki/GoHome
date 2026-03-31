@@ -9,6 +9,7 @@ Use :func:`create_app` to build a configured Flask application instance.
 
 from __future__ import annotations
 
+import importlib.metadata
 import logging
 from typing import Any
 
@@ -25,7 +26,8 @@ def create_app(config_dir: str = ".") -> Flask:
 
     Loads configuration from *config_dir*, validates the directory, sets up
     logging, discovers themes, registers a custom Jinja2 ``category`` test,
-    and registers all routes.
+    registers all routes, and injects the package version into every
+    template context via a context processor.
 
     Args:
         config_dir: Path to the directory containing ``config.yml`` and
@@ -58,5 +60,13 @@ def create_app(config_dir: str = ".") -> Flask:
     app.jinja_env.tests["category"] = _is_category
 
     register_routes(app)
+
+    # Inject the package version into every template context.
+    gohome_version: str = importlib.metadata.version("gohome")
+
+    @app.context_processor
+    def _inject_version() -> dict[str, str]:
+        """Make ``gohome_version`` available in all templates."""
+        return {"gohome_version": gohome_version}
 
     return app

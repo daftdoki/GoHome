@@ -2,6 +2,7 @@
 name = "gohome"
 version = "0.2.0.dev0"
 description = "A self-hosted link directory and redirector service"
+license = "MIT"
 requires-python = ">=3.14"
 dependencies = [
     "flask>=3.1",
@@ -19,6 +20,9 @@ dev = [
 screenshots = [
     "playwright>=1.40",
 ]
+
+[project.urls]
+Repository = "https://github.com/daftdoki/GoHome"
 
 [build-system]
 requires = ["hatchling"]

@@ -393,6 +393,15 @@ footer::before {
     box-shadow: 0 0 12px var(--color-glow-strong);
 }
 
+.version-info {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    text-align: center;
+    text-shadow: none;
+    letter-spacing: 0.04em;
+}
+
 /* ------------------------------------------------------------------ */
 /* Responsive                                                         */
 /* ------------------------------------------------------------------ */

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib.metadata
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -111,3 +112,30 @@ class TestCategoryTemplate:
         """The category description appears on the category page."""
         html = client.get("/streaming").get_data(as_text=True)
         assert "Video services" in html
+
+
+class TestVersionFooter:
+    """Verify the version footer renders on all pages."""
+
+    def test_version_on_root_page(self, client: FlaskClient) -> None:
+        """The version string appears on the root page."""
+        html = client.get("/").get_data(as_text=True)
+        version = importlib.metadata.version("gohome")
+        assert f"GoHome Version {version}" in html
+
+    def test_version_on_category_page(self, client: FlaskClient) -> None:
+        """The version string appears on category pages."""
+        html = client.get("/streaming").get_data(as_text=True)
+        version = importlib.metadata.version("gohome")
+        assert f"GoHome Version {version}" in html
+
+    def test_version_matches_package_metadata(self, client: FlaskClient) -> None:
+        """The rendered version matches importlib.metadata."""
+        html = client.get("/").get_data(as_text=True)
+        version = importlib.metadata.version("gohome")
+        assert version in html
+
+    def test_github_link_rendered(self, client: FlaskClient) -> None:
+        """The GitHub repo link is rendered as a clickable anchor."""
+        html = client.get("/").get_data(as_text=True)
+        assert '<a href="https://github.com/daftdoki/GoHome">' in html

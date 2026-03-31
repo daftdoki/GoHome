@@ -256,6 +256,22 @@ footer {
     background-color: var(--color-header-bg);
 }
 
+.version-info {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.version-info a {
+    color: var(--color-link);
+    text-decoration: none;
+}
+
+.version-info a:hover {
+    text-decoration: underline;
+}
+
 /* ------------------------------------------------------------------ */
 /* Responsive                                                         */
 /* ------------------------------------------------------------------ */

@@ -95,6 +95,11 @@ Each entry needs a `name`. Add a `url` to make it a link, or add
 `entries` to make it a category that groups links together. The
 `description` field is optional.
 
+> **Note:** GoHome reads `directory.yml` at startup. After editing this
+> file, restart the application for changes to take effect — restart the
+> Docker Compose stack (`docker compose restart`), the Docker container,
+> or the Python process depending on how you are running it.
+
 Names are automatically converted into URL-safe slugs for redirects:
 the name is lowercased, spaces become hyphens, and special characters
 are removed. A link named **My Cool Site** becomes `go/my-cool-site`.
@@ -228,6 +233,15 @@ directory:
   - name: Kagi
     url: https://kagi.com
 ```
+
+GoHome reads this file once at startup. After making changes, restart
+the application for them to take effect:
+
+- **Docker Compose:**
+  `docker compose restart` (or `docker compose up -d` to recreate)
+- **Standalone Docker:**
+  `docker restart <container>` or stop and start the container
+- **Python:** stop the running process and start it again
 
 **Rules:**
 

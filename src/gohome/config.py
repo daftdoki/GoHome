@@ -10,6 +10,7 @@ never starts with a broken configuration.
 from __future__ import annotations
 
 import logging
+import os
 import sys
 from pathlib import Path
 from types import MappingProxyType
@@ -22,16 +23,30 @@ from gohome.normalize import normalize_name
 
 logger = logging.getLogger(__name__)
 
-_KNOWN_CONFIG_KEYS: frozenset[str] = frozenset(
-    {"site_title", "host", "port", "log_level", "default_theme"}
-)
+_ENV_VAR_MAP: dict[str, str] = {
+    "site_title": "GOHOME_SITE_TITLE",
+    "host": "GOHOME_HOST",
+    "port": "GOHOME_PORT",
+    "log_level": "GOHOME_LOG_LEVEL",
+    "default_theme": "GOHOME_DEFAULT_THEME",
+}
+"""Mapping from ``config.yml`` keys to their environment variable overrides."""
+
+_KNOWN_CONFIG_KEYS: frozenset[str] = frozenset(_ENV_VAR_MAP)
 
 
 def load_app_config(config_dir: str) -> AppConfig:
-    """Load application settings from ``config.yml``.
+    """Load application settings from ``config.yml`` with env var overrides.
 
-    If the file is missing the service starts with defaults.  Unknown keys
-    trigger a warning but do not prevent startup.
+    Resolution priority (highest wins):
+        ``GOHOME_*`` environment variables > ``config.yml`` > built-in defaults
+
+    If the config file is missing the service starts with defaults (which
+    may still be overridden by environment variables).  Unknown keys trigger
+    a warning but do not prevent startup.
+
+    Supported environment variables: ``GOHOME_SITE_TITLE``, ``GOHOME_HOST``,
+    ``GOHOME_PORT``, ``GOHOME_LOG_LEVEL``, ``GOHOME_DEFAULT_THEME``.
 
     Args:
         config_dir: Path to the directory containing ``config.yml``.
@@ -40,32 +55,44 @@ def load_app_config(config_dir: str) -> AppConfig:
         A populated :class:`AppConfig` instance.
     """
     config_path = Path(config_dir) / "config.yml"
+    raw: dict[str, Any] = {}
+
     if not config_path.exists():
         logger.info("No config.yml found — using defaults")
-        return AppConfig(config_dir=str(Path(config_dir).resolve()))
+    else:
+        try:
+            parsed: Any = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+        except yaml.YAMLError as exc:
+            logger.error("Malformed config.yml: %s", exc)
+            sys.exit(1)
 
-    try:
-        raw: Any = yaml.safe_load(config_path.read_text(encoding="utf-8"))
-    except yaml.YAMLError as exc:
-        logger.error("Malformed config.yml: %s", exc)
-        sys.exit(1)
+        if isinstance(parsed, dict):
+            raw = parsed
+            for key in raw:
+                if key not in _KNOWN_CONFIG_KEYS:
+                    logger.warning("Unknown config key: %r", key)
+        else:
+            logger.info("config.yml is empty or not a mapping — using defaults")
 
-    if not isinstance(raw, dict):
-        logger.info("config.yml is empty or not a mapping — using defaults")
-        return AppConfig(config_dir=str(Path(config_dir).resolve()))
+    # Build kwargs from config.yml values, then overlay env var overrides.
+    # Unspecified keys are omitted so AppConfig dataclass defaults apply.
+    kwargs: dict[str, Any] = {}
+    for config_key, env_var in _ENV_VAR_MAP.items():
+        env_value = os.environ.get(env_var)
+        if env_value is not None:
+            kwargs[config_key] = env_value
+        elif config_key in raw:
+            kwargs[config_key] = raw[config_key]
 
-    for key in raw:
-        if key not in _KNOWN_CONFIG_KEYS:
-            logger.warning("Unknown config key: %r", key)
+    # Port must be an integer
+    if "port" in kwargs:
+        try:
+            kwargs["port"] = int(kwargs["port"])
+        except ValueError, TypeError:
+            logger.error("Invalid port value: %r", kwargs["port"])
+            sys.exit(1)
 
-    return AppConfig(
-        site_title=str(raw.get("site_title", "GoHome")),
-        host=str(raw.get("host", "0.0.0.0")),
-        port=int(raw.get("port", 8080)),
-        log_level=str(raw.get("log_level", "info")),
-        default_theme=str(raw.get("default_theme", "default")),
-        config_dir=str(Path(config_dir).resolve()),
-    )
+    return AppConfig(config_dir=str(Path(config_dir).resolve()), **kwargs)
 
 
 def load_directory(config_dir: str) -> Directory:

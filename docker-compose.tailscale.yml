@@ -1,0 +1,29 @@
+---
+services:
+  tailscale:
+    image: tailscale/tailscale:latest
+    env_file:
+      - ./config/tailscale.env
+    environment:
+      TS_HOSTNAME: "go"
+      TS_STATE_DIR: "/var/lib/tailscale"
+      TS_SERVE_CONFIG: "/config/serve.json"
+    volumes:
+      - ts-state:/var/lib/tailscale
+      - ./tailscale/serve.json:/config/serve.json:ro
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    restart: unless-stopped
+
+  gohome:
+    build: .
+    network_mode: "service:tailscale"
+    environment:
+      GOHOME_HOST: "127.0.0.1"
+    volumes:
+      - ./config:/config:ro
+    restart: unless-stopped
+
+volumes:
+  ts-state:

@@ -35,3 +35,6 @@ Thumbs.db
 
 # Docker
 docker-compose.yml
+
+config/
+ts-state/

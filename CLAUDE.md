@@ -50,7 +50,7 @@ uv run ruff check --fix src/ tests/ scripts/
 uv run mypy src/
 uv run pytest
 markdownlint-cli2 "**/*.md"
-yamllint sample_config/ docker-compose.example.yml
+yamllint sample_config/ docker-compose.example.yml docker-compose.tailscale.yml
 ```
 
 ## Generating Screenshots
@@ -82,6 +82,8 @@ uv run python scripts/generate_screenshots.py
 - `docs/screenshots/` — Auto-generated theme screenshots (committed)
 - `scripts/` — Developer utility scripts
 - `sample_config/` — Example configuration files
+- `tailscale/` — Tailscale serve configuration for go links deployment
+- `docker-compose.tailscale.yml` — Docker Compose with Tailscale sidecar
 
 ## Architecture Notes
 

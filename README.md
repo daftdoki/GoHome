@@ -1,5 +1,7 @@
 # GoHome
 
+[![CI](https://github.com/daftdoki/gohome/actions/workflows/ci.yml/badge.svg)](https://github.com/daftdoki/gohome/actions/workflows/ci.yml)
+
 A self-hosted go-links service for your [Tailscale](https://tailscale.com/)
 network. Define your links and categories in YAML, deploy with Docker,
 and access them instantly from any device on your tailnet via short URLs

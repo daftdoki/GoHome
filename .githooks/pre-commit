@@ -19,6 +19,6 @@ echo "==> markdownlint-cli2"
 markdownlint-cli2 "**/*.md"
 
 echo "==> yamllint"
-yamllint sample_config/ docker-compose.example.yml docker-compose.tailscale.yml
+yamllint sample_config/ docker-compose*.yml
 
 echo "All checks passed."

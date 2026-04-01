@@ -56,7 +56,7 @@ uv run ruff check --fix src/ tests/ scripts/
 uv run mypy src/
 uv run pytest
 markdownlint-cli2 "**/*.md"
-yamllint sample_config/ docker-compose.example.yml docker-compose.tailscale.yml
+yamllint sample_config/ docker-compose*.yml
 ```
 
 ## Generating Screenshots
@@ -91,7 +91,10 @@ uv run python scripts/generate_screenshots.py
   `git config core.hooksPath .githooks`)
 - `sample_config/` — Example configuration files
 - `tailscale/` — Tailscale serve configuration for go links deployment
-- `docker-compose.tailscale.yml` — Docker Compose with Tailscale sidecar
+- `docker-compose.yml` — Primary: GHCR image + Tailscale sidecar
+- `docker-compose.standalone.yml` — GHCR image, no Tailscale
+- `docker-compose.build.yml` — Build from source + Tailscale (dev)
+- `docker-compose.build.standalone.yml` — Build from source (dev)
 
 ## Architecture Notes
 

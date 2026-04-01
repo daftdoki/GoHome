@@ -20,33 +20,130 @@ This is a shameless and less capable and imaginative spin on the
 tailscale [golink](https://tailscale.com/blog/golink) open source
 project.
 
+## Table of Contents
+
+- [Setup Guide (Tailscale)](#setup-guide)
+- [Standalone Docker (without Tailscale)](#standalone-docker)
+- [User Guide](#user-guide)
+- [Configuration Reference](#configuration-reference)
+- [Troubleshooting](#troubleshooting)
+- [Developer Guide](#developer-guide)
+- [Screenshots](#screenshots)
+
 ## Setup Guide
 
 Deploy GoHome on your Tailscale network using Docker. By the end,
-`go/` will work from every device on your tailnet.
+`go/` will work from every device on your tailnet. No build tools
+are required — you will pull a prebuilt image from the GitHub
+Container Registry.
 
-**Prerequisites:** A [Tailscale account](https://login.tailscale.com/start),
-[Docker](https://docs.docker.com/get-docker/) with Docker Compose, and
-[Git](https://git-scm.com/downloads).
+**Prerequisites:**
 
-### Clone the Repository
+- A [Tailscale account](https://login.tailscale.com/start) with
+  [MagicDNS](https://tailscale.com/kb/1081/magicdns) enabled
+  (on by default)
+- [Docker](https://docs.docker.com/get-docker/) with Docker Compose
+- A reusable Tailscale
+  [auth key](https://login.tailscale.com/admin/settings/keys)
 
-```bash
-git clone https://github.com/DaftDoki/GoHome.git
-cd GoHome
-```
-
-All remaining commands assume you are in the `GoHome` directory.
-
-### Create Your Configuration
+### Step 1: Create a Project Directory
 
 ```bash
-mkdir config
-cp sample_config/directory.yml config/directory.yml
-cp sample_config/config.yml config/config.yml
+mkdir -p gohome/config gohome/tailscale
+cd gohome
 ```
 
-Edit `config/directory.yml` to define your links:
+### Step 2: Download the Docker Compose File
+
+Download the Compose file or create it manually. This file runs two
+containers: a Tailscale sidecar that joins your tailnet, and GoHome
+itself.
+
+```bash
+curl -fLO https://raw.githubusercontent.com/DaftDoki/GoHome/main/docker-compose.yml
+```
+
+<details>
+<summary>View file contents</summary>
+
+```yaml
+---
+services:
+  tailscale:
+    image: tailscale/tailscale:latest
+    env_file:
+      - ./config/tailscale.env
+    environment:
+      TS_HOSTNAME: "go"
+      TS_STATE_DIR: "/var/lib/tailscale"
+      TS_SERVE_CONFIG: "/config/serve.json"
+    volumes:
+      - ts-state:/var/lib/tailscale
+      - ./tailscale/serve.json:/config/serve.json:ro
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    restart: unless-stopped
+
+  gohome:
+    image: ghcr.io/daftdoki/gohome:latest
+    network_mode: "service:tailscale"
+    environment:
+      GOHOME_HOST: "127.0.0.1"
+    volumes:
+      - ./config:/config:ro
+    restart: unless-stopped
+
+volumes:
+  ts-state:
+```
+
+</details>
+
+### Step 3: Download the Tailscale Serve Configuration
+
+This tells Tailscale how to route incoming traffic to GoHome.
+
+```bash
+curl -fLo tailscale/serve.json \
+  https://raw.githubusercontent.com/DaftDoki/GoHome/main/tailscale/serve.json
+```
+
+<details>
+<summary>View file contents</summary>
+
+```json
+{
+  "TCP": {
+    "80": {
+      "HTTP": true
+    }
+  },
+  "Web": {
+    "${TS_CERT_DOMAIN}:80": {
+      "Handlers": {
+        "/": {
+          "Proxy": "http://127.0.0.1:8080"
+        }
+      }
+    }
+  }
+}
+```
+
+</details>
+
+### Step 4: Create Your Link Directory
+
+Download the sample directory file and edit it with your own links.
+
+```bash
+curl -fLo config/directory.yml \
+  https://raw.githubusercontent.com/DaftDoki/GoHome/main/sample_config/directory.yml
+```
+
+<details>
+<summary>View file contents</summary>
 
 ```yaml
 ---
@@ -55,62 +152,186 @@ directory:
     url: https://google.com
     description: The world's most popular search engine
 
+  - name: Wikipedia
+    url: https://wikipedia.org
+    description: The free encyclopedia
+
   - name: Streaming
-    description: Video streaming services
+    description: A category for streaming services
     entries:
       - name: Netflix
         url: https://netflix.com
+        description: Movies and TV shows on demand
       - name: YouTube
         url: https://youtube.com
+        description: Free video sharing platform
+
+  - name: Kagi
+    url: https://kagi.com
+    description: A premium search engine focused on quality results
+
+  - name: Development
+    description: Tools and resources for software development
+    entries:
+      - name: GitHub
+        url: https://github.com
+        description: Code hosting and collaboration platform
+      - name: Stack Overflow
+        url: https://stackoverflow.com
+        description: Q&A for programmers
 ```
 
-Each entry needs a `name`. Add a `url` to make it a link, or add
-`entries` to make it a category. The `description` field is optional.
+</details>
 
-> **Note:** GoHome reads `directory.yml` at startup. Restart the
-> application after editing for changes to take effect.
+Open `config/directory.yml` in a text editor and replace the sample
+entries with your own links. Each entry needs a `name`. Add a `url`
+to make it a link, or add `entries` to make it a category that groups
+links together. The `description` field is optional.
 
-Names are converted into URL-safe slugs for redirects (e.g., **My Cool
-Site** becomes `go/my-cool-site`). See
-[Slug normalization](#slug-normalization) for full rules.
+A minimal file with just one link looks like this:
 
-The `config.yml` file is optional — defaults work out of the box. See
-[config.yml](#configyml) to customize settings like the site title or
-default theme.
-
-### Set Up Tailscale
-
-GoHome uses a Tailscale sidecar container to join your tailnet with the
-hostname `go`. Generate a reusable auth key in the Tailscale admin
-console under **Settings > Keys** and save it:
-
-```bash
-# config/tailscale.env
-TS_AUTHKEY=tskey-auth-YOUR-KEY-HERE
+```yaml
+---
+directory:
+  - name: My NAS
+    url: http://nas.local:5000
 ```
 
-**Keep `tailscale.env` private.** Do not commit it to version control.
+Names are automatically converted into URL-safe slugs — **My NAS**
+becomes `go/my-nas`. See [Slug normalization](#slug-normalization)
+for the full rules.
 
-### Start GoHome
+### Step 5: Set Up Your Tailscale Auth Key
+
+Generate a reusable auth key in the
+[Tailscale admin console](https://login.tailscale.com/admin/settings/keys)
+under **Settings > Keys**. Enable **Reusable** so the container can
+re-authenticate after restarts.
+
+Create the environment file with your key:
 
 ```bash
-cp docker-compose.tailscale.yml docker-compose.yml
+curl -fLo config/tailscale.env \
+  https://raw.githubusercontent.com/DaftDoki/GoHome/main/sample_config/tailscale.env.example
+```
+
+<details>
+<summary>View file contents</summary>
+
+```bash
+# Paste your Tailscale auth key below.
+# Generate one at: https://login.tailscale.com/admin/settings/keys
+# Enable "Reusable" so the container can re-authenticate after
+# restarts.
+TS_AUTHKEY=tskey-auth-PASTE-YOUR-KEY-HERE
+```
+
+</details>
+
+Open `config/tailscale.env` and replace
+`tskey-auth-PASTE-YOUR-KEY-HERE` with your actual auth key.
+
+**Keep `tailscale.env` private.** It grants access to your tailnet.
+
+### Step 6: Start GoHome
+
+```bash
 docker compose up -d
 ```
 
 Confirm a machine named **go** appears in the
 [Tailscale admin console](https://login.tailscale.com/admin/machines),
-then visit `go/` from any device on your tailnet.
+then visit `go/` from any device on your tailnet. Try `go/google`
+(or whatever you named your first link) to test a redirect.
 
-If something is not working, see
-[Tailscale Troubleshooting](#tailscale-troubleshooting).
+If something is not working, see [Troubleshooting](#troubleshooting).
+
+### Updating
+
+Pull the latest image and restart:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+### Changing Your Links
+
+Edit `config/directory.yml`, then restart GoHome for changes to
+take effect:
+
+```bash
+docker compose restart gohome
+```
+
+## Standalone Docker
+
+If you do not use Tailscale, you can run GoHome as a plain Docker
+container accessible on port 8080.
+
+**Prerequisites:** [Docker](https://docs.docker.com/get-docker/)
+with Docker Compose.
+
+### Step 1: Create a Project Directory
+
+```bash
+mkdir -p gohome/config
+cd gohome
+```
+
+### Step 2: Download the Docker Compose File
+
+```bash
+curl -fLO https://raw.githubusercontent.com/DaftDoki/GoHome/main/docker-compose.standalone.yml
+```
+
+<details>
+<summary>View file contents</summary>
+
+```yaml
+---
+services:
+  gohome:
+    image: ghcr.io/daftdoki/gohome:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config:/config:ro
+```
+
+</details>
+
+### Step 3: Create Your Link Directory
+
+```bash
+curl -fLo config/directory.yml \
+  https://raw.githubusercontent.com/DaftDoki/GoHome/main/sample_config/directory.yml
+```
+
+Open `config/directory.yml` and replace the sample entries with your
+own links. See [Step 4 of the Setup Guide](#step-4-create-your-link-directory)
+for the full format and a minimal example.
+
+### Step 4: Start GoHome
+
+```bash
+docker compose -f docker-compose.standalone.yml up -d
+```
+
+Open `http://localhost:8080` in your browser. To access GoHome from
+other devices on your network, use `http://<host-ip>:8080`.
+
+To update, restart, or change links, follow the same commands in the
+[Setup Guide](#updating) — just add `-f docker-compose.standalone.yml`
+to your `docker compose` commands.
 
 ## User Guide
 
 ### Browsing the Directory
 
-Visit `go/` to see all links and categories, displayed in the order
-defined by the administrator.
+Visit `go/` (or `http://localhost:8080` for standalone) to see all
+links and categories, displayed in the order defined in
+`directory.yml`.
 
 ### Quick Redirects
 
@@ -137,25 +358,41 @@ Use the footer controls to switch themes (dropdown) and set
 light/dark/auto mode. Preferences are stored in cookies. Auto follows
 the browser's `prefers-color-scheme` setting and is the default.
 
-## Configuration Guide
+## Configuration Reference
 
 ### Configuration Directory
 
-GoHome reads configuration from a single directory:
+GoHome reads configuration from a single directory mounted at
+`/config` inside the container. In the Docker Compose files above,
+this is mapped to `./config` on your host:
 
 ```text
-config_dir/
+config/
 ├── config.yml           # Optional application settings
 ├── directory.yml        # Required link directory
-├── tailscale.env        # Tailscale auth key (for Tailscale deployment)
+├── tailscale.env        # Tailscale auth key (Tailscale setup only)
 └── themes/              # Optional custom theme CSS files
     └── nord.css
 ```
 
 ### directory.yml
 
-See the [Setup Guide](#create-your-configuration) for the basic format
-and an example.
+Every entry must have a `name`. Add a `url` to make it a link, or
+add `entries` to make it a category:
+
+```yaml
+---
+directory:
+  - name: Google
+    url: https://google.com
+    description: The world's most popular search engine
+
+  - name: Streaming
+    description: Video streaming services
+    entries:
+      - name: Netflix
+        url: https://netflix.com
+```
 
 **Rules:**
 
@@ -164,8 +401,11 @@ and an example.
 - If both `url` and `entries` are present, it is treated as a category
 - Category `entries` must not be empty
 - Names must be globally unique after slug normalization
-- Only one level of nesting is supported (nested categories are skipped)
-- The `description` field is optional for both links and categories
+- Only one level of nesting is supported
+- The `description` field is optional
+
+If the configuration is invalid, GoHome will not start. Run
+`docker compose logs gohome` to see the error message.
 
 #### Slug normalization
 
@@ -184,11 +424,12 @@ startup.
 
 #### Restarting after changes
 
-GoHome reads `directory.yml` once at startup. After making changes:
+GoHome reads `directory.yml` once at startup. After editing your
+links, restart for changes to take effect:
 
-- **Docker Compose:** `docker compose restart`
-- **Standalone Docker:** `docker restart <container>`
-- **Python:** stop and restart the process
+```bash
+docker compose restart gohome
+```
 
 ### config.yml
 
@@ -202,97 +443,27 @@ log_level: "info"           # debug, info, warning, error
 default_theme: "default"    # Theme for first-time visitors
 ```
 
-Every setting can also be overridden with an environment variable — see
-[Environment Variables](#environment-variables).
+You can also download the sample file:
+
+```bash
+curl -fLo config/config.yml \
+  https://raw.githubusercontent.com/DaftDoki/GoHome/main/sample_config/config.yml
+```
+
+Every setting can also be overridden with an environment variable —
+see [Environment Variables](#environment-variables).
 
 ### Custom Themes
 
-Place `.css` files in the `themes/` subdirectory. Each file becomes a
-selectable theme named after the file (e.g., `themes/nord.css` creates
-theme "nord"). Themes must be fully self-contained — they do not
-inherit from the default theme.
+Place `.css` files in the `themes/` subdirectory of your config
+directory. Each file becomes a selectable theme named after the file
+(e.g., `themes/nord.css` creates theme "nord"). Themes must be fully
+self-contained — they do not inherit from the default theme.
 
 Use CSS custom properties for colors. Support light and dark modes via
 `.light` and `.dark` body classes plus a `prefers-color-scheme` media
 query fallback. See `src/gohome/static/default.css` for the full
 reference.
-
-### Deploying on Tailscale
-
-The recommended deployment method. A Tailscale sidecar container joins
-your tailnet with hostname `go` and proxies traffic to GoHome. The
-Compose file runs two containers sharing a network namespace:
-**tailscale** (networking) and **gohome** (application). Tailscale
-encrypts all traffic between nodes, so plain HTTP on port 80 is
-sufficient.
-
-**Prerequisites:** A [Tailscale account](https://login.tailscale.com/start)
-with [MagicDNS](https://tailscale.com/kb/1081/magicdns) enabled,
-Docker with Docker Compose, and a reusable
-[auth key](https://login.tailscale.com/admin/settings/keys).
-
-See the [Setup Guide](#set-up-tailscale) for step-by-step instructions.
-
-### Tailscale Troubleshooting
-
-**"go" does not resolve:**
-Confirm MagicDNS is enabled, verify the browsing device is on the same
-tailnet (`tailscale status`), and check that the machine shows as **go**
-in the admin console. Some browsers treat short hostnames as search
-queries — try `http://go/` explicitly.
-
-**Container fails to join the tailnet:**
-Ensure `TS_AUTHKEY` in `tailscale.env` has not expired. Check logs with
-`docker compose logs tailscale`. If using ACL tags, verify the auth key
-is authorized for those tags.
-
-**Hostname "go" is already taken:**
-A previous container may have registered the hostname. Remove the stale
-machine in the admin console, delete the local state volume
-(`docker volume rm gohome_ts-state`), and restart the stack. See
-[docs/troubleshooting.md](docs/troubleshooting.md) for detailed steps.
-
-**GoHome is not reachable:**
-Verify both containers are running (`docker compose ps`), check GoHome
-logs (`docker compose logs gohome`), and ensure
-`network_mode: service:tailscale` is set in the Compose file.
-
-### Standalone Docker (without Tailscale)
-
-**Quick preview with sample data:**
-
-```bash
-docker compose -f docker-compose.example.yml up -d
-# Open http://localhost:8080
-```
-
-**Custom config without Tailscale:**
-
-```yaml
-# docker-compose.yml
-services:
-  gohome:
-    build: .
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./config:/config:ro
-```
-
-### Running Directly with Python
-
-No Docker required. Requires Python 3.14+ and
-[uv](https://docs.astral.sh/uv/).
-
-```bash
-uv sync
-uv run python -m gohome sample_config/
-# Open http://localhost:8080
-```
-
-Pass your own config directory instead of `sample_config/` to use
-custom links. See the [Developer Guide](#developer-guide) for the full
-development setup.
 
 ### Environment Variables
 
@@ -307,7 +478,73 @@ env vars > config.yml > built-in defaults):
 | `GOHOME_LOG_LEVEL` | `log_level` | `info` |
 | `GOHOME_DEFAULT_THEME` | `default_theme` | `default` |
 
+## Troubleshooting
+
+### "go" does not resolve
+
+Confirm MagicDNS is enabled in the Tailscale admin console under
+**DNS**. Verify the browsing device is on the same tailnet
+(`tailscale status`), and check that the machine shows as **go**
+in the admin console. Some browsers treat short hostnames as search
+queries — try `http://go/` with the scheme explicitly included.
+
+### Container fails to join the tailnet
+
+Ensure `TS_AUTHKEY` in `config/tailscale.env` has not expired. Check
+logs with `docker compose logs tailscale`. If using ACL tags, verify
+the auth key is authorized for those tags.
+
+### Hostname "go" is already taken
+
+A previous container may have registered the hostname. Remove the
+stale machine in the
+[admin console](https://login.tailscale.com/admin/machines), delete
+the local state volume (`docker volume rm gohome_ts-state`), and
+restart the stack. See
+[docs/troubleshooting.md](docs/troubleshooting.md) for detailed
+steps.
+
+### GoHome is not reachable
+
+Verify both containers are running (`docker compose ps`), check
+GoHome logs (`docker compose logs gohome`), and ensure
+`network_mode: service:tailscale` is set in the Compose file.
+
+### GoHome won't start
+
+If GoHome exits immediately, your configuration likely has an error.
+Check the logs:
+
+```bash
+docker compose logs gohome
+```
+
+Common causes: missing `directory.yml`, duplicate link names, or
+empty category entries. Fix the issue and restart:
+
+```bash
+docker compose restart gohome
+```
+
 ## Developer Guide
+
+### AI Use
+
+It's apparent that Claude Code was used to create this project. I
+work in tech, and these tools are changing the game for all of us.
+This project was a weekend-ish of work where the primary intent
+wasn't creating this thing, it was trying out some approaches to one
+shotting a greenfield app and seeing how much ambiguity I could get
+away with and not end up with crappy slop. But in the end it's
+useful, so I've polished it up and published it. If you work in
+tech, you should be using these new tools to at least inform your
+opinions about them, whether they are good or bad.
+
+Check out the
+[initial requirements doc](docs/Initial%20Requirements.md) if you're
+interested in what the AI started with and maybe use that to play
+with adapting and generating it with whatever stack and language you
+prefer. Stay curious.
 
 ### Prerequisites
 
@@ -321,6 +558,8 @@ env vars > config.yml > built-in defaults):
 ### Setup
 
 ```bash
+git clone https://github.com/DaftDoki/GoHome.git
+cd GoHome
 uv sync --all-extras
 git config core.hooksPath .githooks
 ```
@@ -334,6 +573,16 @@ the same suite that CI runs.
 ```bash
 uv run python -m gohome sample_config/
 # Server starts at http://localhost:8080
+```
+
+Or use the build-from-source Docker Compose files:
+
+```bash
+# With Tailscale:
+docker compose -f docker-compose.build.yml up -d
+
+# Without Tailscale (uses sample_config):
+docker compose -f docker-compose.build.standalone.yml up -d
 ```
 
 ### Testing
@@ -354,7 +603,7 @@ uv run ruff check --fix src/ tests/ scripts/
 uv run mypy src/
 uv run pytest
 markdownlint-cli2 "**/*.md"
-yamllint sample_config/ docker-compose.example.yml docker-compose.tailscale.yml
+yamllint sample_config/ docker-compose*.yml
 ```
 
 ### Dependency Policy
@@ -387,8 +636,8 @@ git push origin v0.2.0
 # Produces tags: 0.2.0, 0.2, latest, sha-<short>
 ```
 
-**Dev builds** from the `dev` branch are opt-in. Add `[build]` anywhere
-in the commit message to trigger a container build:
+**Dev builds** from the `dev` branch are opt-in. Add `[build]`
+anywhere in the commit message to trigger a container build:
 
 ```bash
 git commit -m "Add feature [build]"

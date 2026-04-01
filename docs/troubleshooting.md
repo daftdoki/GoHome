@@ -14,7 +14,7 @@ container as a different node and assigns a suffixed hostname like
 **Solution:**
 
 1. Stop the current stack:
-   `docker compose -f docker-compose.tailscale.yml down`
+   `docker compose down`
 2. Open the
    [Tailscale admin console](https://login.tailscale.com/admin/machines)
 3. Find the stale `go` machine (usually shown as offline) and remove it
@@ -24,7 +24,7 @@ container as a different node and assigns a suffixed hostname like
    `docker volume rm gohome_ts-state`
    (the volume name may differ — check with `docker volume ls`)
 5. Restart the stack:
-   `docker compose -f docker-compose.tailscale.yml up -d`
+   `docker compose up -d`
 6. Confirm the machine appears as **go** in the admin console
 
 **Prevention:** Use a reusable auth key with a tag so that

@@ -42,5 +42,4 @@ jobs:
       - name: Lint YAML
         run: |
           pip install yamllint
-          yamllint sample_config/ docker-compose.example.yml \
-            docker-compose.tailscale.yml
+          yamllint sample_config/ docker-compose*.yml

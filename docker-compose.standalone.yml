@@ -1,0 +1,8 @@
+---
+services:
+  gohome:
+    image: ghcr.io/daftdoki/gohome:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config:/config:ro

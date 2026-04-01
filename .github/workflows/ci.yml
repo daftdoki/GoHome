@@ -1,0 +1,45 @@
+---
+name: CI
+
+"on":
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python
+        run: uv python install 3.14
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Check formatting
+        run: uv run ruff format --check src/ tests/ scripts/
+
+      - name: Lint
+        run: uv run ruff check src/ tests/ scripts/
+
+      - name: Type check
+        run: uv run mypy src/
+
+      - name: Test
+        run: uv run pytest
+
+      - name: Lint Markdown
+        uses: DavidAnson/markdownlint-cli2-action@v19
+
+      - name: Lint YAML
+        run: |
+          pip install yamllint
+          yamllint sample_config/ docker-compose.example.yml \
+            docker-compose.tailscale.yml

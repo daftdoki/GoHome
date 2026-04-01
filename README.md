@@ -2,11 +2,12 @@
 
 [![CI](https://github.com/daftdoki/gohome/actions/workflows/ci.yml/badge.svg)](https://github.com/daftdoki/gohome/actions/workflows/ci.yml)
 
-A self-hosted go-links service for your [Tailscale](https://tailscale.com/)
-network. Define links and categories in YAML, deploy with Docker, and
-access them from any device on your tailnet via short URLs like
-`go/link-name`. Browse the full directory at `go/`, or filter by
-category at `go/category-name`.
+A self-hosted short link service and directory for your
+[Tailscale](https://tailscale.com/) network. Define links and categories
+in YAML, deploy with Docker, and access them from any device on your
+tailnet via short URLs like `go/link-name`. Browse the full directory at
+`go/`, or filter by category at `go/category-name`. See
+[Screenshots](#screenshots) for examples of the directory view.
 
 ## Setup Guide
 

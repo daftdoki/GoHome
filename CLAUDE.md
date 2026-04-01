@@ -178,6 +178,9 @@ prohibited.
   made by Claude.
 - No commit may introduce linting, formatting, or type-check warnings or
   errors.
+- When the user asks to commit, push, and build on the `dev` branch,
+  include `[build]` in the commit message to trigger a container image
+  build. Without `[build]`, pushes to `dev` run CI only.
 
 ## Keeping CLAUDE.md Current
 

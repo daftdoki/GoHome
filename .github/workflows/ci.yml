@@ -6,6 +6,7 @@ name: CI
     branches: [main, dev]
   pull_request:
     branches: [main, dev]
+  workflow_call:
 
 jobs:
   lint-and-test:

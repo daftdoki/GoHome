@@ -348,6 +348,36 @@ markdownlint-cli2 "**/*.md"
 yamllint sample_config/ docker-compose.example.yml docker-compose.tailscale.yml
 ```
 
+### Container Builds
+
+Container images are published to GHCR
+(`ghcr.io/daftdoki/gohome`) by the publish workflow.
+
+**Release builds** happen automatically when a version tag is pushed:
+
+```bash
+git tag v0.2.0
+git push origin v0.2.0
+# Produces tags: 0.2.0, 0.2, latest, sha-<short>
+```
+
+**Dev builds** from the `dev` branch are opt-in. Add `[build]` anywhere
+in the commit message to trigger a container build:
+
+```bash
+git commit -m "Add feature [build]"
+git push origin dev
+# Produces tags: dev, sha-<short>
+```
+
+Pushes to `dev` without `[build]` run CI only — no image is built.
+
+You can also trigger a dev build manually without a new commit:
+
+```bash
+gh workflow run publish.yml --ref dev
+```
+
 ### Project Structure
 
 ```text

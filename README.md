@@ -2,10 +2,17 @@
 
 [![CI](https://github.com/daftdoki/gohome/actions/workflows/ci.yml/badge.svg)](https://github.com/daftdoki/gohome/actions/workflows/ci.yml)
 
-A self-hosted short link service and directory for your
-[Tailscale](https://tailscale.com/) network. Define links and categories
-in YAML, deploy with Docker, and access them from any device on your
-tailnet via short URLs like `go/link-name`. Browse the full directory at
+A self-hosted go-links service for your
+[Tailscale](https://tailscale.com/) tailnet. Do you find yourself trying
+to remember what port that weird device's web UI was on three months
+after you set it up? Does typing a long hostname really inconvenience
+you? If you're bothered by trivial things and would rather just remember
+to type `go/nas` or `go/arr` into your web browser then this project is
+here to free you from these trivial shackles.
+
+Define links and categories in YAML, deploy with Docker, and access
+them from any device on your tailnet via short URLs like
+`go/link-name`. Browse the full directory at
 `go/`, or filter by category at `go/category-name`. See
 [Screenshots](#screenshots) for examples of the directory view.
 

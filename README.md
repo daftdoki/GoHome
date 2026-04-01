@@ -28,6 +28,7 @@ browse just that category. Links and categories are defined in
   - [config.yml](#configyml)
   - [Custom Themes](#custom-themes)
   - [Deploying on Tailscale](#deploying-on-tailscale)
+  - [Tailscale Troubleshooting](#tailscale-troubleshooting)
   - [Standalone Docker (without Tailscale)](#standalone-docker-without-tailscale)
   - [Running Directly with Python](#running-directly-with-python)
   - [Environment Variables](#environment-variables)
@@ -350,7 +351,7 @@ The Compose file runs two containers sharing a network namespace:
 Tailscale encrypts all traffic between nodes, so plain HTTP on port 80
 is sufficient.
 
-#### Tailscale Troubleshooting
+### Tailscale Troubleshooting
 
 **"go" does not resolve:**
 

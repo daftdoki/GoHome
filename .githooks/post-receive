@@ -1,0 +1,59 @@
+#!/bin/sh
+
+# This post-receive script is meant to be used for remotes that you
+# want to deploy to.
+
+# On the target host create a bare git repo somewhere:
+#
+#  $ mkdir gohome.git && cd gohome.git
+#  $ git init --bare
+#
+# Then put this file into hooks/post-receive on the remote.
+#
+# On your local git repo add the remote and push:
+#
+#  $ git remote add <HOST> ssh://<HOST>/path/to/gohome.git
+#  $ git push <HOST> +main:refs/heads/main
+#
+# If it's successful you should see your code in the GIT_WORK_TREE directory
+
+set -e
+
+# Source profiles to get full PATH (including docker)
+if [ -f /etc/profile ]; then
+    . /etc/profile
+fi
+
+if [ -f "$HOME/.profile" ]; then
+    . "$HOME/.profile"
+fi
+
+export GIT_WORK_TREE=/share/Container/container-station-data/application/gohome
+
+while read oldrev newrev refname; do
+    branch=${refname##refs/heads/}
+done
+git checkout -f "$branch"
+cd $GIT_WORK_TREE
+
+# Rebuild and restart the container
+echo "Stopping container..."
+docker compose down
+
+echo "Building Docker image..."
+docker compose build
+
+echo "Starting container..."
+docker compose up -d
+
+# Verify the container stays running
+echo "Waiting 10 seconds to verify container is healthy..."
+sleep 10
+
+if docker compose ps --status running | grep -q .; then
+    echo "Deployment complete! Container is running."
+else
+    echo "ERROR: Container is not running after 10 seconds!" >&2
+    docker compose logs --tail 50
+    exit 1
+fi

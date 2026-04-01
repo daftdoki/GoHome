@@ -9,7 +9,13 @@ Flask. See `docs/Initial Requirements.md` for full requirements.
 
 ```bash
 uv sync --all-extras
+git config core.hooksPath .githooks
 ```
+
+The `git config` command activates the shared pre-commit hook in
+`.githooks/pre-commit`, which runs the full lint/format/type-check/test
+suite before each commit. This is a local config setting — it must be
+run once per clone.
 
 ## Running
 
@@ -81,6 +87,8 @@ uv run python scripts/generate_screenshots.py
 - `docs/` — Documentation and requirements
 - `docs/screenshots/` — Auto-generated theme screenshots (committed)
 - `scripts/` — Developer utility scripts
+- `.githooks/` — Shared git hooks (activate with
+  `git config core.hooksPath .githooks`)
 - `sample_config/` — Example configuration files
 - `tailscale/` — Tailscale serve configuration for go links deployment
 - `docker-compose.tailscale.yml` — Docker Compose with Tailscale sidecar

@@ -16,6 +16,10 @@ them from any device on your tailnet via short URLs like
 `go/`, or filter by category at `go/category-name`. See
 [Screenshots](#screenshots) for examples of the directory view.
 
+This is a shameless and less capable and imaginative spin on the
+tailscale [golink](https://tailscale.com/blog/golink) open source
+project.
+
 ## Setup Guide
 
 Deploy GoHome on your Tailscale network using Docker. By the end,
@@ -318,7 +322,12 @@ env vars > config.yml > built-in defaults):
 
 ```bash
 uv sync --all-extras
+git config core.hooksPath .githooks
 ```
+
+The `git config` command activates the shared pre-commit hook, which
+runs all linters, formatters, and tests before each commit. This is
+the same suite that CI runs.
 
 ### Running Locally
 

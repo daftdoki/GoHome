@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -e
+
+echo "Running pre-commit checks..."
+
+echo "==> ruff format"
+uv run ruff format --check src/ tests/ scripts/
+
+echo "==> ruff check"
+uv run ruff check src/ tests/ scripts/
+
+echo "==> mypy"
+uv run mypy src/
+
+echo "==> pytest"
+uv run pytest
+
+echo "==> markdownlint-cli2"
+markdownlint-cli2 "**/*.md"
+
+echo "==> yamllint"
+yamllint sample_config/ docker-compose.example.yml docker-compose.tailscale.yml
+
+echo "All checks passed."

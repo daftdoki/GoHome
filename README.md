@@ -1,7 +1,13 @@
 # GoHome
 
 A self-hosted go-links service for your [Tailscale](https://tailscale.com/)
-network. Define your links and categories in YAML, deploy with Docker,
+tailnet. Do you find yourself trying to remember what port that weird device's
+web UI was on three months after you set it up? Does typing a long hostname
+really inconvenience you? If you're bothered by trivial things and would rather
+just remember to type `go/nas` or `go/arr` into your web browser then this
+project is here to free you from these trivial shackles.
+
+Define your links and categories in YAML, deploy with Docker,
 and access them instantly from any device on your tailnet via short URLs
 like `go/link-name`, or browse the directory by going to `go/`. Categories
 are supported, which you can navigate to by name via `go/category-name` to

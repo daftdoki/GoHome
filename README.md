@@ -102,7 +102,8 @@ defined by the administrator.
 
 ### Quick Redirects
 
-Type `go/` followed by a link's slug to redirect instantly:
+Type `go/` followed by a link's [slug](#slug-normalization) to
+redirect instantly:
 
 | Display name | URL |
 | --- | --- |

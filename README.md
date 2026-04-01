@@ -347,37 +347,8 @@ Browser on tailnet
 
 The Compose file runs two containers sharing a network namespace:
 **tailscale** (handles networking) and **gohome** (the application).
-Tailscale encrypts all traffic between nodes, so HTTP on port 80 is
-used by default.
-
-#### HTTPS (optional)
-
-If you prefer HTTPS (for browser padlock, HSTS, or organizational
-policy), replace `tailscale/serve.json` with:
-
-```json
-{
-  "TCP": {
-    "443": {
-      "HTTPS": true
-    }
-  },
-  "Web": {
-    "${TS_CERT_DOMAIN}:443": {
-      "Handlers": {
-        "/": {
-          "Proxy": "http://127.0.0.1:8080"
-        }
-      }
-    }
-  }
-}
-```
-
-Tailscale provisions a TLS certificate automatically via Let's Encrypt.
-Your machine must have
-[HTTPS enabled](https://tailscale.com/kb/1153/enabling-https) in the
-admin console. URLs become `https://go/link-name`.
+Tailscale encrypts all traffic between nodes, so plain HTTP on port 80
+is sufficient.
 
 #### Tailscale Troubleshooting
 

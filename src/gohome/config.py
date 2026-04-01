@@ -88,7 +88,7 @@ def load_app_config(config_dir: str) -> AppConfig:
     if "port" in kwargs:
         try:
             kwargs["port"] = int(kwargs["port"])
-        except ValueError, TypeError:
+        except (ValueError, TypeError):  # fmt: skip
             logger.error("Invalid port value: %r", kwargs["port"])
             sys.exit(1)
 

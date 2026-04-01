@@ -22,12 +22,13 @@ browse just that category. Links and categories are defined in
   - [Quick Redirects](#quick-redirects)
   - [Category Pages](#category-pages)
   - [Themes and Modes](#themes-and-modes)
-- [Administrator Guide](#administrator-guide)
+- [Configuration Guide](#configuration-guide)
   - [Configuration Directory](#configuration-directory)
   - [directory.yml](#directoryyml)
   - [config.yml](#configyml)
   - [Custom Themes](#custom-themes)
   - [Deploying on Tailscale](#deploying-on-tailscale)
+  - [Tailscale Troubleshooting](#tailscale-troubleshooting)
   - [Standalone Docker (without Tailscale)](#standalone-docker-without-tailscale)
   - [Running Directly with Python](#running-directly-with-python)
   - [Environment Variables](#environment-variables)
@@ -105,11 +106,11 @@ Each entry needs a `name`. Add a `url` to make it a link, or add
 Names are automatically converted into URL-safe slugs for redirects:
 the name is lowercased, spaces become hyphens, and special characters
 are removed. A link named **My Cool Site** becomes `go/my-cool-site`.
-See [directory.yml](#directoryyml) in the Administrator Guide for the
+See [directory.yml](#directoryyml) in the Configuration Guide for the
 complete format and rules.
 
 The `config.yml` file is optional — the defaults work out of the box.
-See [config.yml](#configyml) in the Administrator Guide if you want to
+See [config.yml](#configyml) in the Configuration Guide if you want to
 customize settings like the site title or default theme.
 
 ### Set Up Tailscale
@@ -197,7 +198,7 @@ Use the footer controls to:
   cookie); Auto follows the browser's `prefers-color-scheme` setting and
   is the default for all themes
 
-## Administrator Guide
+## Configuration Guide
 
 Detailed reference for configuring and deploying GoHome.
 
@@ -347,39 +348,10 @@ Browser on tailnet
 
 The Compose file runs two containers sharing a network namespace:
 **tailscale** (handles networking) and **gohome** (the application).
-Tailscale encrypts all traffic between nodes, so HTTP on port 80 is
-used by default.
+Tailscale encrypts all traffic between nodes, so plain HTTP on port 80
+is sufficient.
 
-#### HTTPS (optional)
-
-If you prefer HTTPS (for browser padlock, HSTS, or organizational
-policy), replace `tailscale/serve.json` with:
-
-```json
-{
-  "TCP": {
-    "443": {
-      "HTTPS": true
-    }
-  },
-  "Web": {
-    "${TS_CERT_DOMAIN}:443": {
-      "Handlers": {
-        "/": {
-          "Proxy": "http://127.0.0.1:8080"
-        }
-      }
-    }
-  }
-}
-```
-
-Tailscale provisions a TLS certificate automatically via Let's Encrypt.
-Your machine must have
-[HTTPS enabled](https://tailscale.com/kb/1153/enabling-https) in the
-admin console. URLs become `https://go/link-name`.
-
-#### Tailscale Troubleshooting
+### Tailscale Troubleshooting
 
 **"go" does not resolve:**
 

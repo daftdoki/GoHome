@@ -22,7 +22,7 @@ browse just that category. Links and categories are defined in
   - [Quick Redirects](#quick-redirects)
   - [Category Pages](#category-pages)
   - [Themes and Modes](#themes-and-modes)
-- [Administrator Guide](#administrator-guide)
+- [Configuration Guide](#configuration-guide)
   - [Configuration Directory](#configuration-directory)
   - [directory.yml](#directoryyml)
   - [config.yml](#configyml)
@@ -105,11 +105,11 @@ Each entry needs a `name`. Add a `url` to make it a link, or add
 Names are automatically converted into URL-safe slugs for redirects:
 the name is lowercased, spaces become hyphens, and special characters
 are removed. A link named **My Cool Site** becomes `go/my-cool-site`.
-See [directory.yml](#directoryyml) in the Administrator Guide for the
+See [directory.yml](#directoryyml) in the Configuration Guide for the
 complete format and rules.
 
 The `config.yml` file is optional — the defaults work out of the box.
-See [config.yml](#configyml) in the Administrator Guide if you want to
+See [config.yml](#configyml) in the Configuration Guide if you want to
 customize settings like the site title or default theme.
 
 ### Set Up Tailscale
@@ -197,7 +197,7 @@ Use the footer controls to:
   cookie); Auto follows the browser's `prefers-color-scheme` setting and
   is the default for all themes
 
-## Administrator Guide
+## Configuration Guide
 
 Detailed reference for configuring and deploying GoHome.
 

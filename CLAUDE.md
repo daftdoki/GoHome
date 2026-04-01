@@ -115,6 +115,16 @@ uv run python scripts/generate_screenshots.py
 - **Immutability**: Use frozen dataclasses for data models
 - **Dependency management**: `uv` exclusively. Never use pip, poetry, or
   pipenv. Declare deps in `pyproject.toml`, lock in `uv.lock`.
+- **Dependency cooldown**: `pyproject.toml` sets
+  `exclude-newer = "2 weeks"` under `[tool.uv]` as a security measure
+  against software supply chain compromises. This ensures all uv
+  commands automatically ignore package versions published within the
+  last two weeks, giving time for malicious releases to be detected
+  and removed. This setting must never be removed, overridden, or
+  worked around — not even temporarily. When updating dependencies,
+  use `uv lock --upgrade`, which respects this constraint. "Latest"
+  in this project always means the latest version at least two weeks
+  old.
 
 ### Test Suite
 

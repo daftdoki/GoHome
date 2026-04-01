@@ -348,6 +348,23 @@ markdownlint-cli2 "**/*.md"
 yamllint sample_config/ docker-compose.example.yml docker-compose.tailscale.yml
 ```
 
+### Dependency Policy
+
+To mitigate software supply chain compromises, dependency resolution
+is configured with a two-week cooldown. The `[tool.uv]` section in
+`pyproject.toml` sets `exclude-newer = "2 weeks"`, which tells uv to
+ignore any package version published within the last two weeks. This
+applies automatically to all `uv lock`, `uv sync`, and `uv add`
+commands.
+
+When updating dependencies, simply run:
+
+```bash
+uv lock --upgrade
+```
+
+Only versions at least two weeks old will be considered.
+
 ### Container Builds
 
 Container images are published to GHCR

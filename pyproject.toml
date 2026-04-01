@@ -31,6 +31,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/gohome"]
 
+[tool.uv]
+exclude-newer = "2 weeks"
+
 [tool.mypy]
 strict = true
 packages = ["gohome"]

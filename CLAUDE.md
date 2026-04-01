@@ -148,6 +148,27 @@ uv run python scripts/generate_screenshots.py
 
 - Linted with `yamllint` — all issues must be resolved before committing.
 
+## Resolving Tool Conflicts
+
+When linters, formatters, or type checkers disagree with each other, **never
+silence or bypass a tool to make things pass**. No `# fmt: skip`, `# type:
+ignore`, `# noqa`, `# noinspection`, or equivalent suppression comments
+unless the root cause is fully understood and suppression is the only correct
+option.
+
+Instead:
+
+1. **Diagnose the root cause.** Determine which tool is correct and why the
+   other disagrees. Check versions, configurations, and language semantics.
+2. **Verify with the actual runtime.** Use the Python REPL, AST module, or
+   minimal test cases to confirm behavior — don't guess.
+3. **Fix the real problem.** If a tool is misconfigured, fix the config. If
+   a tool is outdated, document the issue. If the code is wrong, fix the
+   code.
+
+Suppression comments that paper over an uninvestigated conflict are
+prohibited.
+
 ## Commit Rules
 
 - Every commit must be a single atomic unit that leaves all tests passing
@@ -174,8 +195,3 @@ It must be kept up to date and must contain (or link to) documentation for:
 - **Administrators** — how to configure and deploy the service
 - **Developers** — how to set up a build environment, run tests, and
   contribute
-
-## Troubleshooting
-
-When Claude diagnoses and fixes a problem, record the problem, solution,
-and diagnostic steps in `docs/troubleshooting.md`.

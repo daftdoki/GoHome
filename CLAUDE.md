@@ -195,8 +195,3 @@ It must be kept up to date and must contain (or link to) documentation for:
 - **Administrators** — how to configure and deploy the service
 - **Developers** — how to set up a build environment, run tests, and
   contribute
-
-## Troubleshooting
-
-When Claude diagnoses and fixes a problem, record the problem, solution,
-and diagnostic steps in `docs/troubleshooting.md`.

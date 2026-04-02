@@ -20,6 +20,9 @@ dev = [
 screenshots = [
     "playwright>=1.40",
 ]
+e2e = [
+    "pytest-playwright>=0.6",
+]
 
 [project.urls]
 Repository = "https://github.com/daftdoki/GoHome"
@@ -41,6 +44,7 @@ mypy_path = "src"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["e2e: End-to-end browser tests (require Playwright)"]
 
 [tool.ruff]
 src = ["src"]

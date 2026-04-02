@@ -8,7 +8,7 @@ in README.md.
 Usage::
 
     uv sync --extra screenshots
-    uv run playwright install chromium
+    uv run playwright install webkit
     uv run python scripts/generate_screenshots.py
 
 The script must be run from the repository root.
@@ -186,7 +186,7 @@ def main() -> None:
         print("Server ready.")
 
         with sync_playwright() as pw:
-            browser = pw.chromium.launch()
+            browser = pw.webkit.launch()
             context = browser.new_context(
                 viewport={"width": VIEWPORT_WIDTH, "height": VIEWPORT_HEIGHT}
             )

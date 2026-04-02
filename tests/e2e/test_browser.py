@@ -214,10 +214,10 @@ class TestCategoryNavigation:
     """Verify clicking into and out of category pages."""
 
     def test_click_category_loads_category_page(self, page: Page) -> None:
-        """Clicking a category heading navigates to its listing page."""
+        """Clicking a category link navigates to its listing page."""
         page.goto("/")
 
-        page.locator(".category h2 a", has_text="Streaming").click()
+        page.locator(".category-link", has_text="\u2197").first.click()
         page.wait_for_load_state("load")
 
         # Category page shows its title and links
@@ -272,3 +272,46 @@ class TestCategoryNavigation:
         # Back on root — all categories visible
         expect(page.locator(".category h2", has_text="Streaming")).to_be_visible()
         expect(page.locator(".category h2", has_text="Development")).to_be_visible()
+
+
+# ---------------------------------------------------------------------------
+# Collapsible categories
+# ---------------------------------------------------------------------------
+
+
+class TestCategoryCollapse:
+    """Verify that category sections are collapsible."""
+
+    def test_categories_expanded_by_default(self, page: Page) -> None:
+        """Category sections are expanded by default via the open attribute."""
+        page.goto("/")
+        details = page.locator(".category details")
+        for i in range(details.count()):
+            assert details.nth(i).get_attribute("open") is not None
+
+    def test_click_summary_collapses_category(self, page: Page) -> None:
+        """Clicking a category summary collapses its content."""
+        page.goto("/")
+        summary = page.locator(".category summary").first
+        details = page.locator(".category details").first
+
+        # Initially expanded — nested links visible
+        expect(details.locator(".link").first).to_be_visible()
+
+        # Click to collapse
+        summary.click()
+        expect(details.locator(".link").first).not_to_be_visible()
+
+        # Click again to expand
+        summary.click()
+        expect(details.locator(".link").first).to_be_visible()
+
+    def test_category_link_navigates_without_collapsing(self, page: Page) -> None:
+        """Clicking the category navigation link navigates to the category page."""
+        page.goto("/")
+
+        with page.expect_navigation():
+            page.locator(".category-link").first.click()
+
+        # Navigated to a category page
+        expect(page.locator(".breadcrumbs")).to_contain_text("Home")

@@ -44,6 +44,16 @@
     }
 
     /* ------------------------------------------------------------------ */
+    /* Category links — prevent toggle when clicking the navigation link  */
+    /* ------------------------------------------------------------------ */
+    var categoryLinks = document.querySelectorAll(".category-link");
+    for (var i = 0; i < categoryLinks.length; i++) {
+        categoryLinks[i].addEventListener("click", function (e) {
+            e.stopPropagation();
+        });
+    }
+
+    /* ------------------------------------------------------------------ */
     /* Mode selector                                                      */
     /* ------------------------------------------------------------------ */
     var modeSelect = document.getElementById("mode-select");

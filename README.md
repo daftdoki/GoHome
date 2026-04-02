@@ -151,10 +151,14 @@ directory:
   - name: Google
     url: https://google.com
     description: The world's most popular search engine
+    aliases:
+      - search
 
   - name: Wikipedia
     url: https://wikipedia.org
     description: The free encyclopedia
+    aliases:
+      - wiki
 
   - name: Streaming
     description: A category for streaming services
@@ -165,6 +169,8 @@ directory:
       - name: YouTube
         url: https://youtube.com
         description: Free video sharing platform
+        aliases:
+          - yt
 
   - name: Kagi
     url: https://kagi.com
@@ -176,9 +182,14 @@ directory:
       - name: GitHub
         url: https://github.com
         description: Code hosting and collaboration platform
+        aliases:
+          - gh
       - name: Stack Overflow
         url: https://stackoverflow.com
         description: Q&A for programmers
+        aliases:
+          - so
+          - stackoverflow
 ```
 
 </details>
@@ -186,7 +197,12 @@ directory:
 Open `config/directory.yml` in a text editor and replace the sample
 entries with your own links. Each entry needs a `name`. Add a `url`
 to make it a link, or add `entries` to make it a category that groups
-links together. The `description` field is optional.
+links together. The `description` and `aliases` fields are optional.
+
+Use `aliases` to create shorthand URLs for a link — for example, the
+sample config sets `search` as an alias for Google, so both
+`go/google` and `go/search` reach the same destination. Aliases are
+displayed in the web UI for discoverability.
 
 A minimal file with just one link looks like this:
 
@@ -195,11 +211,13 @@ A minimal file with just one link looks like this:
 directory:
   - name: My NAS
     url: http://nas.local:5000
+    aliases:
+      - nas
 ```
 
-Names are automatically converted into URL-safe slugs — **My NAS**
-becomes `go/my-nas`. See [Slug normalization](#slug-normalization)
-for the full rules.
+Names and aliases are automatically converted into URL-safe slugs —
+**My NAS** becomes `go/my-nas`. See
+[Slug normalization](#slug-normalization) for the full rules.
 
 ### Step 5: Set Up Your Tailscale Auth Key
 
@@ -345,7 +363,9 @@ redirect instantly:
 | Bob's Links! | `go/bobs-links` |
 
 Links inside categories work the same way — `go/netflix` redirects
-even though Netflix is listed under Streaming.
+even though Netflix is listed under Streaming. If a link has
+[aliases](#aliases), those work too — `go/search` redirects to the
+same place as `go/google`.
 
 ### Category Pages
 

@@ -188,6 +188,35 @@ class TestCategoryNavigation:
         expect(page.locator(".link a", has_text="Netflix")).to_be_visible()
         expect(page.locator(".link a", has_text="YouTube")).to_be_visible()
 
+    def test_category_url_renders_only_its_links(self, page: Page) -> None:
+        """Navigating directly to a category URL shows only that category's links."""
+        page.goto("/streaming")
+
+        # Category title and description visible
+        expect(page.locator("h2", has_text="Streaming")).to_be_visible()
+        expect(
+            page.locator(".category-description", has_text="streaming services")
+        ).to_be_visible()
+
+        # Category's own links visible
+        expect(page.locator(".link a", has_text="Netflix")).to_be_visible()
+        expect(page.locator(".link a", has_text="YouTube")).to_be_visible()
+
+        # Links from other categories and top-level links are absent
+        assert page.locator(".link a", has_text="GitHub").count() == 0
+        assert page.locator(".link a", has_text="Google").count() == 0
+
+    def test_development_category_url(self, page: Page) -> None:
+        """The development category URL renders its links correctly."""
+        page.goto("/development")
+
+        expect(page.locator("h2", has_text="Development")).to_be_visible()
+        expect(page.locator(".link a", has_text="GitHub")).to_be_visible()
+        expect(page.locator(".link a", has_text="Stack Overflow")).to_be_visible()
+
+        # Streaming links absent
+        assert page.locator(".link a", has_text="Netflix").count() == 0
+
     def test_category_page_has_breadcrumbs(self, page: Page) -> None:
         """Category pages show breadcrumb navigation."""
         page.goto("/streaming")

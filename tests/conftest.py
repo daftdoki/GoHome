@@ -18,12 +18,16 @@ directory:
   - name: Google
     url: https://google.com
     description: A search engine
+    aliases:
+      - search
   - name: Streaming
     description: Video services
     entries:
       - name: Netflix
         url: https://netflix.com
         description: Streaming service
+        aliases:
+          - nf
       - name: YouTube
         url: https://youtube.com
   - name: Kagi

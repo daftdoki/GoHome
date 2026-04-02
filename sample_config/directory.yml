@@ -3,6 +3,8 @@ directory:
   - name: Google
     url: https://google.com
     description: The world's most popular search engine
+    aliases:
+      - search
 
   - name: Wikipedia
     url: https://wikipedia.org
@@ -28,6 +30,8 @@ directory:
       - name: GitHub
         url: https://github.com
         description: Code hosting and collaboration platform
+        aliases:
+          - gh
       - name: Stack Overflow
         url: https://stackoverflow.com
         description: Q&A for programmers

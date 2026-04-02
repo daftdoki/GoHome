@@ -283,6 +283,15 @@ header h1::after {
     text-shadow: none;
 }
 
+.aliases {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    font-style: italic;
+    padding-left: 1.75rem;
+    text-shadow: none;
+}
+
 /* ------------------------------------------------------------------ */
 /* Categories — ASCII box border style                                */
 /* ------------------------------------------------------------------ */

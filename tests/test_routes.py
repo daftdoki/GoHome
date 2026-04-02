@@ -63,6 +63,18 @@ class TestLinkRedirect:
         assert response.status_code == 302
         assert response.headers["Location"] == "https://netflix.com"
 
+    def test_redirect_via_alias(self, client: FlaskClient) -> None:
+        """An alias slug redirects to the same URL as the primary name."""
+        response = client.get("/search")
+        assert response.status_code == 302
+        assert response.headers["Location"] == "https://google.com"
+
+    def test_redirect_via_nested_alias(self, client: FlaskClient) -> None:
+        """An alias on a nested link redirects correctly."""
+        response = client.get("/nf")
+        assert response.status_code == 302
+        assert response.headers["Location"] == "https://netflix.com"
+
 
 class TestCategoryPage:
     """Verify category rendering."""

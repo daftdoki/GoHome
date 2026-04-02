@@ -20,12 +20,14 @@ class LinkEntry:
         slug: The URL-safe normalized slug.
         url: The target URL for redirection.
         description: An optional short description shown in the UI.
+        aliases: Alternative names that also resolve to this link.
     """
 
     name: str
     slug: str
     url: str
     description: str = ""
+    aliases: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -36,12 +38,14 @@ class CategoryEntry:
         name: The human-readable display name.
         slug: The URL-safe normalized slug.
         description: An optional short description shown beneath the heading.
+        aliases: Alternative names that also resolve to this category.
         entries: The links belonging to this category.
     """
 
     name: str
     slug: str
     description: str = ""
+    aliases: tuple[str, ...] = ()
     entries: tuple[LinkEntry, ...] = ()
 
 

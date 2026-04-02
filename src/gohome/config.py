@@ -139,6 +139,34 @@ def load_directory(config_dir: str) -> Directory:
     )
 
 
+def _register_aliases(
+    aliases: tuple[str, ...],
+    name: str,
+    item: DirectoryItem,
+    slug_map: dict[str, DirectoryItem],
+) -> list[str]:
+    """Normalize and register each alias in the slug map.
+
+    Returns the list of alias slugs so callers can update references
+    after rebuilding an item (e.g. categories with populated children).
+
+    Args:
+        aliases: Display-name alias strings to register.
+        name: The primary entry name (for error messages).
+        item: The directory item the aliases point to.
+        slug_map: The slug-to-item mapping being built.
+
+    Returns:
+        The normalized slug for each alias, in order.
+    """
+    alias_slugs: list[str] = []
+    for alias in aliases:
+        alias_slug = normalize_name(alias)
+        _register_slug(alias_slug, f"alias '{alias}' of '{name}'", item, slug_map)
+        alias_slugs.append(alias_slug)
+    return alias_slugs
+
+
 def _register_slug(
     slug: str,
     name: str,
@@ -203,6 +231,16 @@ def _process_entry(
 
     slug = normalize_name(str(name))
 
+    raw_aliases: Any = entry.get("aliases", [])
+    if not isinstance(raw_aliases, list):
+        logger.error("Entry %r 'aliases' must be a list", name)
+        sys.exit(1)
+    for alias_val in raw_aliases:
+        if not isinstance(alias_val, str) or not alias_val.strip():
+            logger.error("Entry %r has invalid alias: %r", name, alias_val)
+            sys.exit(1)
+    aliases = tuple(raw_aliases)
+
     # Category (entries key present — url is ignored if both exist)
     if has_entries:
         if nested:
@@ -224,8 +262,10 @@ def _process_entry(
             name=str(name),
             slug=slug,
             description=str(entry.get("description", "")),
+            aliases=aliases,
         )
         _register_slug(slug, str(name), cat, slug_map)
+        alias_slugs = _register_aliases(aliases, str(name), cat, slug_map)
 
         for child_entry in raw_children:
             _process_entry(child_entry, child_items, slug_map, nested=True)
@@ -235,10 +275,13 @@ def _process_entry(
             name=cat.name,
             slug=cat.slug,
             description=cat.description,
+            aliases=cat.aliases,
             entries=tuple(item for item in child_items if isinstance(item, LinkEntry)),
         )
         # Update slug_map to point to the fully-built category
         slug_map[slug] = cat
+        for alias_slug in alias_slugs:
+            slug_map[alias_slug] = cat
         items.append(cat)
     else:
         # Link entry
@@ -247,6 +290,8 @@ def _process_entry(
             slug=slug,
             url=str(entry["url"]),
             description=str(entry.get("description", "")),
+            aliases=aliases,
         )
         _register_slug(slug, str(name), link, slug_map)
+        _register_aliases(aliases, str(name), link, slug_map)
         items.append(link)

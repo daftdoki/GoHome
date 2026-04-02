@@ -99,7 +99,8 @@ uv run python scripts/generate_screenshots.py
 ## Architecture Notes
 
 - **Slug lookup**: `Directory` pre-builds a flat `dict[str, DirectoryItem]`
-  for O(1) path resolution
+  for O(1) path resolution. Entry aliases are also registered in this
+  map, pointing to the same item as the primary name.
 - **Validation**: Config errors call `sys.exit(1)` — test with
   `pytest.raises(SystemExit)`
 - **Themes**: Bundled themes (`BUNDLED_THEMES` in `themes.py`) are served

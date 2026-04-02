@@ -183,6 +183,19 @@ header h1 {
     margin-top: 0.125rem;
 }
 
+.aliases {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: 0.8125rem;
+    font-style: italic;
+    margin-top: 0.125rem;
+}
+
+/* Indent link aliases to align under the link text */
+.directory .link .aliases {
+    padding-left: 1.1rem;
+}
+
 /* ------------------------------------------------------------------ */
 /* Categories                                                         */
 /* ------------------------------------------------------------------ */

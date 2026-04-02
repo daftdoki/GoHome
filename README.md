@@ -386,6 +386,8 @@ directory:
   - name: Google
     url: https://google.com
     description: The world's most popular search engine
+    aliases:
+      - search
 
   - name: Streaming
     description: Video streaming services
@@ -400,9 +402,9 @@ directory:
 - Entries must have either `url` (link) or `entries` (category)
 - If both `url` and `entries` are present, it is treated as a category
 - Category `entries` must not be empty
-- Names must be globally unique after slug normalization
+- Names and aliases must be globally unique after slug normalization
 - Only one level of nesting is supported
-- The `description` field is optional
+- The `description` and `aliases` fields are optional
 
 If the configuration is invalid, GoHome will not start. Run
 `docker compose logs gohome` to see the error message.
@@ -421,6 +423,23 @@ order:
 Because slugs must be unique, two entries whose names normalize to the
 same slug (e.g., "My Link" and "my-link") cause a validation error at
 startup.
+
+#### Aliases
+
+Any entry can have an `aliases` list of alternative names that also
+redirect to the same URL. Each alias is normalized and registered as
+its own slug, so `go/search` and `go/google` can point to the same
+destination. Aliases are displayed beneath the entry in the web UI
+for discoverability. Alias slugs must be globally unique — they
+cannot collide with any other name or alias.
+
+```yaml
+- name: Google
+  url: https://google.com
+  aliases:
+    - search
+    - gsearch
+```
 
 #### Restarting after changes
 

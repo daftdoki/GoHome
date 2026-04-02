@@ -101,6 +101,18 @@ class TestLinkRedirect:
         assert response.status_code == 302
         assert response.headers["Location"] == "https://stackoverflow.com"
 
+    def test_redirect_via_alias(self, integration_client: FlaskClient) -> None:
+        """An alias slug redirects to the same URL as the primary name."""
+        response = integration_client.get("/search")
+        assert response.status_code == 302
+        assert response.headers["Location"] == "https://google.com"
+
+    def test_nested_link_alias_redirect(self, integration_client: FlaskClient) -> None:
+        """An alias on a nested link redirects correctly."""
+        response = integration_client.get("/gh")
+        assert response.status_code == 302
+        assert response.headers["Location"] == "https://github.com"
+
 
 class TestCategoryListing:
     """Scenario 3: Category name path returns that category's link listing."""

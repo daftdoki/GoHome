@@ -176,7 +176,8 @@ uv run python scripts/generate_screenshots.py
 
 - No external JS or CSS libraries or frameworks.
 - All CSS is hand-written or provided via themes.
-- JS is limited to theme toggling, mode switching, and cookie management.
+- JS is limited to theme toggling, mode switching, cookie management,
+  and category collapse interactivity.
 - A single Jinja2 base template (`templates/base.html`) renders all pages.
 - Themes are self-contained single CSS files — custom themes do not inherit
   from the default theme.

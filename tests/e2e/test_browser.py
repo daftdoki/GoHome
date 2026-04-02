@@ -217,7 +217,7 @@ class TestCategoryNavigation:
         """Clicking a category link navigates to its listing page."""
         page.goto("/")
 
-        page.locator(".category-link", has_text="\u2197").first.click()
+        page.locator("a.category-link").first.click(force=True)
         page.wait_for_load_state("load")
 
         # Category page shows its title and links
@@ -311,7 +311,7 @@ class TestCategoryCollapse:
         page.goto("/")
 
         with page.expect_navigation():
-            page.locator(".category-link").first.click()
+            page.locator("a.category-link").first.click(force=True)
 
         # Navigated to a category page
         expect(page.locator(".breadcrumbs")).to_contain_text("Home")

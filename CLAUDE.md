@@ -152,15 +152,15 @@ uv run python scripts/generate_screenshots.py
 - **Dependency management**: `uv` exclusively. Never use pip, poetry, or
   pipenv. Declare deps in `pyproject.toml`, lock in `uv.lock`.
 - **Dependency cooldown**: `pyproject.toml` sets
-  `exclude-newer` under `[tool.uv]` to a concrete UTC timestamp as a
-  security measure against software supply chain compromises. This
-  ensures all uv commands automatically ignore package versions
-  published after that date, giving time for malicious releases to be
-  detected and removed. This setting must never be removed, overridden,
-  or worked around — not even temporarily. When updating dependencies,
-  advance the timestamp to no more recent than two weeks ago, then run
-  `uv lock --upgrade`. "Latest" in this project always means the latest
-  version at least two weeks old.
+  `exclude-newer = "2 weeks"` under `[tool.uv]` as a security measure
+  against software supply chain compromises. This ensures all uv
+  commands automatically ignore package versions published within the
+  last two weeks, giving time for malicious releases to be detected
+  and removed. This setting must never be removed, overridden, or
+  worked around — not even temporarily. When updating dependencies,
+  use `uv lock --upgrade`, which respects this constraint. "Latest"
+  in this project always means the latest version at least two weeks
+  old.
 
 ### Test Suite
 

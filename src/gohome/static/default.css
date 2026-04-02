@@ -207,17 +207,44 @@ header h1 {
     border: 1px solid var(--color-border);
 }
 
+.category summary {
+    cursor: pointer;
+    list-style: none;
+}
+
+.category summary::-webkit-details-marker {
+    display: none;
+}
+
+.category summary::before {
+    content: "\25BC";
+    display: inline-block;
+    margin-right: 0.4rem;
+    font-size: 0.7em;
+    transition: transform 0.15s ease;
+    color: var(--color-text-muted);
+}
+
+.category details:not([open]) summary::before {
+    transform: rotate(-90deg);
+}
+
 .category h2 {
-    margin: 0 0 0.25rem 0;
+    display: inline;
+    margin: 0;
     font-size: 1.125rem;
 }
 
-.category h2 a {
+.category-link {
+    font-size: 0.75em;
+    font-weight: normal;
+    margin-left: 0.3rem;
     color: var(--color-link);
     text-decoration: none;
+    vertical-align: middle;
 }
 
-.category h2 a:hover {
+.category-link:hover {
     color: var(--color-link-hover);
     text-decoration: underline;
 }
@@ -225,7 +252,7 @@ header h1 {
 .category-description {
     color: var(--color-text-muted);
     font-size: 0.875rem;
-    margin: 0 0 0.5rem 0;
+    margin: 0.25rem 0 0.5rem 0;
 }
 
 .category ul {

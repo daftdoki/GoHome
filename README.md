@@ -349,7 +349,10 @@ to your `docker compose` commands.
 
 Visit `go/` (or `http://localhost:8080` for standalone) to see all
 links and categories, displayed in the order defined in
-`directory.yml`.
+`directory.yml`. Category sections are collapsible — click a category
+heading to collapse or expand it. All categories are expanded by
+default. The small arrow (↗) next to a category name links to that
+category's dedicated page.
 
 ### Quick Redirects
 

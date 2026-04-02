@@ -304,21 +304,55 @@ header h1::after {
 }
 
 /* Category title bar — full-width header inside the box */
-.category h2 {
+.category summary {
     margin: calc(-1 * var(--spacing)) calc(-1 * var(--spacing)) 0.75rem;
     padding: 0.4rem var(--spacing);
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
     border-bottom: 1px solid var(--color-border);
-}
-
-.category h2 a {
+    cursor: pointer;
+    list-style: none;
     color: var(--color-text);
     text-shadow: 0 0 10px var(--color-glow-strong);
 }
 
-.category h2 a:hover {
+.category summary::-webkit-details-marker {
+    display: none;
+}
+
+.category summary::before {
+    content: "\25BC";
+    display: inline-block;
+    margin-right: 0.5rem;
+    font-size: 0.7em;
+    color: var(--color-text-muted);
+}
+
+.category details:not([open]) summary::before {
+    content: "\25B6";
+}
+
+.category details:not([open]) summary {
+    margin-bottom: calc(-1 * var(--spacing));
+    border-bottom: none;
+}
+
+.category h2 {
+    display: inline;
+    margin: 0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.category-link {
+    font-size: 0.75em;
+    font-weight: normal;
+    margin-left: 0.3rem;
+    color: var(--color-text);
+    text-shadow: 0 0 10px var(--color-glow-strong);
+    text-decoration: none;
+}
+
+.category-link:hover {
     color: var(--color-link-hover);
     text-shadow: 0 0 14px var(--color-glow-strong), 0 0 2px #fff;
 }

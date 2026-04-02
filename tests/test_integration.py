@@ -159,6 +159,51 @@ class TestUnknownPaths:
         assert response.headers["Location"] == "/"
 
 
+class TestCategoryNav:
+    """Verify category navigation appears on root page only."""
+
+    def test_root_has_category_nav(self, integration_client: FlaskClient) -> None:
+        """The root page contains a category navigation section."""
+        html = integration_client.get("/").get_data(as_text=True)
+        assert 'class="category-nav"' in html
+
+    def test_root_nav_contains_category_anchors(
+        self, integration_client: FlaskClient
+    ) -> None:
+        """The root page nav contains anchor links to each category."""
+        html = integration_client.get("/").get_data(as_text=True)
+        assert "#streaming" in html
+        assert "#development" in html
+
+    def test_root_categories_have_id_anchors(
+        self, integration_client: FlaskClient
+    ) -> None:
+        """Category sections on root page have id attributes matching slugs."""
+        html = integration_client.get("/").get_data(as_text=True)
+        assert 'id="streaming"' in html
+        assert 'id="development"' in html
+
+    def test_root_has_back_to_top(self, integration_client: FlaskClient) -> None:
+        """The root page contains back-to-top links."""
+        html = integration_client.get("/").get_data(as_text=True)
+        assert 'class="back-to-top"' in html
+        assert "#top" in html
+
+    def test_category_page_no_category_nav(
+        self, integration_client: FlaskClient
+    ) -> None:
+        """Category pages do not contain the category navigation."""
+        html = integration_client.get("/streaming").get_data(as_text=True)
+        assert 'class="category-nav"' not in html
+
+    def test_category_page_no_back_to_top(
+        self, integration_client: FlaskClient
+    ) -> None:
+        """Category pages do not contain back-to-top links."""
+        html = integration_client.get("/streaming").get_data(as_text=True)
+        assert 'class="back-to-top"' not in html
+
+
 class TestThemeCSS:
     """Verify the default theme CSS endpoint."""
 

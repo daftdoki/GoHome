@@ -390,6 +390,49 @@ header h1::after {
     margin-top: 0.4rem;
 }
 
+/* ------------------------------------------------------------------ */
+/* Category navigation (anchor links at top of root page)             */
+/* ------------------------------------------------------------------ */
+.category-nav {
+    margin-bottom: var(--spacing);
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    line-height: 1.8;
+    text-shadow: none;
+}
+
+.category-nav a {
+    color: var(--color-link);
+    text-decoration: none;
+    text-shadow: 0 0 8px var(--color-glow-strong);
+}
+
+.category-nav a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+    text-shadow: 0 0 12px var(--color-glow-strong), 0 0 2px #fff;
+}
+
+/* ------------------------------------------------------------------ */
+/* Back to top                                                        */
+/* ------------------------------------------------------------------ */
+.back-to-top {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    text-align: right;
+    text-shadow: none;
+}
+
+.back-to-top a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+}
+
+.back-to-top a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+    text-shadow: 0 0 8px var(--color-glow);
+}
 
 /* ------------------------------------------------------------------ */
 /* Footer                                                             */

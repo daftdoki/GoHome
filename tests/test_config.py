@@ -150,6 +150,69 @@ class TestLoadDirectoryValid:
         directory = load_directory(str(tmp_path))
         assert isinstance(directory.slug_map["mixed"], CategoryEntry)
 
+    def test_link_with_aliases(self, tmp_path: Path) -> None:
+        """Aliases are stored on the entry and registered in slug_map."""
+        _write_yaml(
+            tmp_path,
+            "directory.yml",
+            (
+                "directory:\n"
+                "  - name: NAS\n"
+                "    url: https://nas.local\n"
+                "    aliases:\n"
+                "      - qnap\n"
+                "      - files\n"
+            ),
+        )
+        directory = load_directory(str(tmp_path))
+        item = directory.slug_map["nas"]
+        assert isinstance(item, LinkEntry)
+        assert item.aliases == ("qnap", "files")
+        assert directory.slug_map["qnap"] is item
+        assert directory.slug_map["files"] is item
+
+    def test_category_with_aliases(self, tmp_path: Path) -> None:
+        """Category aliases are stored and registered in slug_map."""
+        _write_yaml(
+            tmp_path,
+            "directory.yml",
+            (
+                "directory:\n"
+                "  - name: Streaming\n"
+                "    aliases:\n"
+                "      - media\n"
+                "    entries:\n"
+                "      - name: Netflix\n"
+                "        url: https://netflix.com\n"
+            ),
+        )
+        directory = load_directory(str(tmp_path))
+        cat = directory.slug_map["streaming"]
+        assert isinstance(cat, CategoryEntry)
+        assert cat.aliases == ("media",)
+        assert directory.slug_map["media"] is cat
+
+    def test_nested_link_with_aliases(self, tmp_path: Path) -> None:
+        """Aliases on links inside categories are registered in slug_map."""
+        _write_yaml(
+            tmp_path,
+            "directory.yml",
+            (
+                "directory:\n"
+                "  - name: Dev\n"
+                "    entries:\n"
+                "      - name: GitHub\n"
+                "        url: https://github.com\n"
+                "        aliases:\n"
+                "          - gh\n"
+            ),
+        )
+        directory = load_directory(str(tmp_path))
+        link = directory.slug_map["github"]
+        assert isinstance(link, LinkEntry)
+        assert link.aliases == ("gh",)
+        assert directory.slug_map["gh"] is link
+
     def test_preserves_display_order(self, tmp_path: Path) -> None:
         """Items appear in the same order as the YAML file."""
         _write_yaml(
@@ -282,6 +345,107 @@ class TestLoadDirectoryErrors:
             tmp_path,
             "directory.yml",
             "directory:\n  - just a string\n",
+        )
+        with pytest.raises(SystemExit):
+            load_directory(str(tmp_path))
+
+    def test_alias_collides_with_name(self, tmp_path: Path) -> None:
+        """An alias that collides with another entry's name is a fatal error."""
+        _write_yaml(
+            tmp_path,
+            "directory.yml",
+            (
+                "directory:\n"
+                "  - name: Google\n"
+                "    url: https://google.com\n"
+                "    aliases:\n"
+                "      - kagi\n"
+                "  - name: Kagi\n"
+                "    url: https://kagi.com\n"
+            ),
+        )
+        with pytest.raises(SystemExit):
+            load_directory(str(tmp_path))
+
+    def test_alias_collides_with_other_alias(self, tmp_path: Path) -> None:
+        """Two entries with aliases that collide is a fatal error."""
+        _write_yaml(
+            tmp_path,
+            "directory.yml",
+            (
+                "directory:\n"
+                "  - name: Google\n"
+                "    url: https://google.com\n"
+                "    aliases:\n"
+                "      - search\n"
+                "  - name: Kagi\n"
+                "    url: https://kagi.com\n"
+                "    aliases:\n"
+                "      - search\n"
+            ),
+        )
+        with pytest.raises(SystemExit):
+            load_directory(str(tmp_path))
+
+    def test_alias_collides_with_own_name(self, tmp_path: Path) -> None:
+        """An alias that normalizes to the same slug as its own name is fatal."""
+        _write_yaml(
+            tmp_path,
+            "directory.yml",
+            (
+                "directory:\n"
+                "  - name: Google\n"
+                "    url: https://google.com\n"
+                "    aliases:\n"
+                "      - google\n"
+            ),
+        )
+        with pytest.raises(SystemExit):
+            load_directory(str(tmp_path))
+
+    def test_alias_empty_slug(self, tmp_path: Path) -> None:
+        """An alias that normalizes to an empty slug is a fatal error."""
+        _write_yaml(
+            tmp_path,
+            "directory.yml",
+            (
+                "directory:\n"
+                "  - name: Google\n"
+                "    url: https://google.com\n"
+                "    aliases:\n"
+                "      - '!!!'\n"
+            ),
+        )
+        with pytest.raises(SystemExit):
+            load_directory(str(tmp_path))
+
+    def test_alias_null_value(self, tmp_path: Path) -> None:
+        """A null alias value is a fatal error."""
+        _write_yaml(
+            tmp_path,
+            "directory.yml",
+            (
+                "directory:\n"
+                "  - name: Google\n"
+                "    url: https://google.com\n"
+                "    aliases:\n"
+                "      - \n"
+            ),
+        )
+        with pytest.raises(SystemExit):
+            load_directory(str(tmp_path))
+
+    def test_aliases_not_a_list(self, tmp_path: Path) -> None:
+        """An aliases field that is not a list is a fatal error."""
+        _write_yaml(
+            tmp_path,
+            "directory.yml",
+            (
+                "directory:\n"
+                "  - name: Google\n"
+                "    url: https://google.com\n"
+                "    aliases: not-a-list\n"
+            ),
         )
         with pytest.raises(SystemExit):
             load_directory(str(tmp_path))

@@ -42,12 +42,18 @@
                 {% if item.description %}
                 <p class="category-description">{{ item.description }}</p>
                 {% endif %}
+                {% if item.aliases %}
+                <p class="aliases">Also: {{ item.aliases | join(", ") }}</p>
+                {% endif %}
                 <ul>
                 {% for link in item.entries %}
                     <li class="link">
                         <a href="{{ link.url }}">{{ link.name }}</a>
                         {% if link.description %}
                         <span class="description">{{ link.description }}</span>
+                        {% endif %}
+                        {% if link.aliases %}
+                        <span class="aliases">Also: {{ link.aliases | join(", ") }}</span>
                         {% endif %}
                     </li>
                 {% endfor %}
@@ -58,6 +64,9 @@
                 <a href="{{ item.url }}">{{ item.name }}</a>
                 {% if item.description %}
                 <span class="description">{{ item.description }}</span>
+                {% endif %}
+                {% if item.aliases %}
+                <span class="aliases">Also: {{ item.aliases | join(", ") }}</span>
                 {% endif %}
             </li>
             {% endif %}

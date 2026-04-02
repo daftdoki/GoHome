@@ -17,6 +17,17 @@ class TestLinkEntry:
         assert link.slug == "google"
         assert link.url == "https://google.com"
         assert link.description == ""
+        assert link.aliases == ()
+
+    def test_construction_with_aliases(self) -> None:
+        """A LinkEntry stores provided aliases."""
+        link = LinkEntry(
+            name="NAS",
+            slug="nas",
+            url="https://nas.local",
+            aliases=("qnap", "files"),
+        )
+        assert link.aliases == ("qnap", "files")
 
     def test_frozen(self) -> None:
         """LinkEntry instances are immutable."""
@@ -39,6 +50,14 @@ class TestCategoryEntry:
         cat = CategoryEntry(name="Streaming", slug="streaming", entries=(child,))
         assert len(cat.entries) == 1
         assert cat.entries[0] is child
+        assert cat.aliases == ()
+
+    def test_construction_with_aliases(self) -> None:
+        """A CategoryEntry stores provided aliases."""
+        cat = CategoryEntry(
+            name="Streaming", slug="streaming", aliases=("media", "videos")
+        )
+        assert cat.aliases == ("media", "videos")
 
     def test_frozen(self) -> None:
         """CategoryEntry instances are immutable."""

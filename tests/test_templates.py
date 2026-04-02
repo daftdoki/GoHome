@@ -45,6 +45,21 @@ class TestRootTemplate:
         assert "A search engine" in html
         assert "Video services" in html
 
+    def test_aliases_rendered(self, client: FlaskClient) -> None:
+        """Aliases appear in the rendered HTML with the 'Also:' prefix."""
+        html = client.get("/").get_data(as_text=True)
+        assert "Also: search" in html
+
+    def test_nested_aliases_rendered(self, client: FlaskClient) -> None:
+        """Aliases on nested links appear in the rendered HTML."""
+        html = client.get("/").get_data(as_text=True)
+        assert "Also: nf" in html
+
+    def test_no_aliases_no_also_text(self, client: FlaskClient) -> None:
+        """Entries without aliases do not render 'Also:' text."""
+        html = client.get("/").get_data(as_text=True)
+        assert html.count("Also:") == 2  # only Google and Netflix have aliases
+
     def test_breadcrumbs_root(self, client: FlaskClient) -> None:
         """The root page shows 'Home' as plain text (no link)."""
         html = client.get("/").get_data(as_text=True)

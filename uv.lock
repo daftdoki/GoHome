@@ -2,6 +2,9 @@ version = 1
 revision = 3
 requires-python = ">=3.14"
 
+[options]
+exclude-newer = "2026-04-02T00:00:00Z"
+
 [[package]]
 name = "blinker"
 version = "1.9.0"
@@ -126,7 +129,7 @@ screenshots = [
 [package.metadata]
 requires-dist = [
     { name = "flask", specifier = ">=3.1" },
-    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.15" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.20" },
     { name = "playwright", marker = "extra == 'screenshots'", specifier = ">=1.40" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pytest-playwright", marker = "extra == 'e2e'", specifier = ">=0.6" },

@@ -46,6 +46,24 @@ Run only integration tests:
 uv run pytest tests/test_integration.py -v
 ```
 
+### E2E Browser Tests
+
+E2E tests in `tests/e2e/` use pytest-playwright to exercise JavaScript
+behaviour (theme/mode switching, cookie persistence) and full browser
+rendering that the Flask test client cannot verify.
+
+```bash
+uv sync --extra e2e
+uv run playwright install webkit
+uv run pytest tests/e2e/ -v
+```
+
+E2E tests are auto-marked with `e2e`. Run all tests except E2E:
+
+```bash
+uv run pytest -m 'not e2e'
+```
+
 ## Linting and Formatting
 
 All of these must pass before committing:
@@ -84,6 +102,7 @@ uv run python scripts/generate_screenshots.py
   - `static/` — Bundled CSS (`default.css`, `retro-green.css`,
     `retro-amber.css`, `retro-ansi.css`), JS, favicon
 - `tests/` — Test suite (pytest)
+  - `e2e/` — E2E browser tests (pytest-playwright)
 - `docs/` — Documentation and requirements
 - `docs/screenshots/` — Auto-generated theme screenshots (committed)
 - `scripts/` — Developer utility scripts
@@ -145,10 +164,11 @@ uv run python scripts/generate_screenshots.py
   Aim for meaningful coverage, not just line coverage.
 - **Config errors**: Use `pytest.raises(SystemExit)` when testing startup
   validation failures.
-- **Frontend JS**: Not directly tested. Server-side integration tests verify
-  the server-side contract (correct HTML attributes and classes rendered
-  based on cookie values). Flask's test client does not execute JS — this
-  is accepted.
+- **Frontend JS**: Tested via E2E browser tests in `tests/e2e/` using
+  pytest-playwright. Theme switching, mode switching, and cookie
+  persistence are verified with a real browser. Server-side integration
+  tests additionally verify the server-side contract (correct HTML
+  attributes and classes rendered based on cookie values).
 - **Integration tests**: Must cover (1) root directory page, (2) link
   redirect, (3) category listing. Live in `tests/test_integration.py`.
 

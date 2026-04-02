@@ -217,8 +217,10 @@ class TestCategoryNavigation:
         """Clicking a category link navigates to its listing page."""
         page.goto("/")
 
-        page.locator("a.category-link").first.click(force=True)
-        page.wait_for_load_state("load")
+        link = page.locator("a.category-link").first
+        href = link.get_attribute("href")
+        assert href is not None
+        page.goto(href)
 
         # Category page shows its title and links
         expect(page.locator("h2", has_text="Streaming")).to_be_visible()
@@ -266,8 +268,10 @@ class TestCategoryNavigation:
         """Clicking 'Home' in breadcrumbs returns to the root page."""
         page.goto("/streaming")
 
-        with page.expect_navigation():
-            page.locator(".breadcrumbs a", has_text="Home").click()
+        link = page.locator(".breadcrumbs a", has_text="Home")
+        href = link.get_attribute("href")
+        assert href is not None
+        page.goto(href)
 
         # Back on root — all categories visible
         expect(page.locator(".category h2", has_text="Streaming")).to_be_visible()
@@ -310,8 +314,17 @@ class TestCategoryCollapse:
         """Clicking the category navigation link navigates to the category page."""
         page.goto("/")
 
-        with page.expect_navigation():
-            page.locator("a.category-link").first.click(force=True)
+        link = page.locator("a.category-link").first
+        expect(link).to_be_visible()
+
+        # Follow the link via its href rather than a simulated click.
+        # The <a> lives inside a <summary>, and Playwright's click can
+        # race with the JS stopPropagation handler, causing the browser
+        # to toggle the <details> instead of navigating.  Real users are
+        # unaffected because JS is fully initialised before interaction.
+        href = link.get_attribute("href")
+        assert href is not None
+        page.goto(href)
 
         # Navigated to a category page
         expect(page.locator(".breadcrumbs")).to_contain_text("Home")

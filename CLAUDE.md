@@ -138,6 +138,11 @@ uv run python scripts/generate_screenshots.py
 - **Python version**: 3.14 (currently 3.14.3)
 - **Type annotations**: Required on all functions, methods, and module-level
   variables. Enforce with `mypy --strict` — no errors or warnings permitted.
+- **PEP 758**: Python 3.14 allows `except ValueError, TypeError:` without
+  parentheses. The mypy config must set `python_version = "3.14"` for mypy
+  to recognize this syntax. Do not "fix" this by adding parentheses — it is
+  valid Python 3.14. If mypy fails on this syntax, update mypy or verify
+  `python_version` is set correctly in `[tool.mypy]`.
 - **Docstrings**: Every module, class, and function must have a docstring.
   Use Google-style docstrings. Explain what it does and how to use it —
   neither terse nor verbose.

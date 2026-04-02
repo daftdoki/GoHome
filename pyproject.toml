@@ -39,6 +39,7 @@ exclude-newer = "2 weeks"
 
 [tool.mypy]
 strict = true
+python_version = "3.14"
 packages = ["gohome"]
 mypy_path = "src"
 

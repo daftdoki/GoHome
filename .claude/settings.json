@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv self update 2>/dev/null; uv sync --all-extras 2>/dev/null; true"
+          }
+        ]
+      }
+    ]
+  }
+}

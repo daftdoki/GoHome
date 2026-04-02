@@ -18,7 +18,7 @@ class TestNoCookies:
     def test_no_body_class(self, client: FlaskClient) -> None:
         """Without cookies, the body has no mode class (empty string)."""
         html = client.get("/").get_data(as_text=True)
-        assert '<body class="">' in html
+        assert '<body class="" id="top">' in html
 
     def test_default_theme_used(self, client: FlaskClient) -> None:
         """Without cookies, the admin's default theme is active."""
@@ -38,19 +38,19 @@ class TestModeCookie:
         """The dark mode cookie sets body class to 'dark'."""
         client.set_cookie("gohome_mode", "dark")
         html = client.get("/").get_data(as_text=True)
-        assert '<body class="dark">' in html
+        assert '<body class="dark" id="top">' in html
 
     def test_light_mode_cookie(self, client: FlaskClient) -> None:
         """The light mode cookie sets body class to 'light'."""
         client.set_cookie("gohome_mode", "light")
         html = client.get("/").get_data(as_text=True)
-        assert '<body class="light">' in html
+        assert '<body class="light" id="top">' in html
 
     def test_invalid_mode_cookie_ignored(self, client: FlaskClient) -> None:
         """An invalid mode cookie value results in no body class."""
         client.set_cookie("gohome_mode", "invalid")
         html = client.get("/").get_data(as_text=True)
-        assert '<body class="">' in html
+        assert '<body class="" id="top">' in html
 
 
 class TestThemeCookie:

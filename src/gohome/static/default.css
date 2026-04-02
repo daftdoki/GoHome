@@ -262,6 +262,45 @@ header h1 {
 }
 
 /* ------------------------------------------------------------------ */
+/* Category navigation (anchor links at top of root page)             */
+/* ------------------------------------------------------------------ */
+.category-nav {
+    margin-bottom: var(--spacing);
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    line-height: 1.8;
+}
+
+.category-nav a {
+    color: var(--color-link);
+    text-decoration: none;
+}
+
+.category-nav a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+}
+
+/* ------------------------------------------------------------------ */
+/* Back to top                                                        */
+/* ------------------------------------------------------------------ */
+.back-to-top {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    text-align: right;
+}
+
+.back-to-top a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+}
+
+.back-to-top a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+}
+
+/* ------------------------------------------------------------------ */
 /* Footer                                                             */
 /* ------------------------------------------------------------------ */
 footer {

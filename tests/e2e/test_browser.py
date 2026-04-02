@@ -315,3 +315,35 @@ class TestCategoryCollapse:
 
         # Navigated to a category page
         expect(page.locator(".breadcrumbs")).to_contain_text("Home")
+
+
+# ---------------------------------------------------------------------------
+# Category anchor navigation (root page only)
+# ---------------------------------------------------------------------------
+
+
+class TestCategoryAnchorNav:
+    """Verify the category anchor navigation bar on the root page."""
+
+    def test_category_nav_visible_on_root(self, page: Page) -> None:
+        """The category nav bar is visible on the root page."""
+        page.goto("/")
+        nav = page.locator(".category-nav")
+        expect(nav).to_be_visible()
+        expect(nav.locator("a", has_text="Streaming")).to_be_visible()
+        expect(nav.locator("a", has_text="Development")).to_be_visible()
+
+    def test_category_nav_absent_on_category_page(self, page: Page) -> None:
+        """The category nav bar does not appear on category pages."""
+        page.goto("/streaming")
+        assert page.locator(".category-nav").count() == 0
+
+    def test_back_to_top_visible_on_root(self, page: Page) -> None:
+        """Back-to-top links are visible inside categories on the root page."""
+        page.goto("/")
+        expect(page.locator(".back-to-top").first).to_be_visible()
+
+    def test_back_to_top_absent_on_category_page(self, page: Page) -> None:
+        """Back-to-top links do not appear on category pages."""
+        page.goto("/streaming")
+        assert page.locator(".back-to-top").count() == 0

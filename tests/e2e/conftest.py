@@ -14,11 +14,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
+from playwright.sync_api import Playwright
 from werkzeug.serving import make_server
 
 from gohome import create_app
 
 if TYPE_CHECKING:
+    from playwright.sync_api import APIRequestContext
     from werkzeug.serving import BaseWSGIServer
 
 SAMPLE_CONFIG_DIR = str(Path(__file__).resolve().parent.parent.parent / "sample_config")
@@ -90,3 +92,25 @@ def base_url(live_server: BaseWSGIServer) -> str:
     """
     host, port = live_server.server_address
     return f"http://{host}:{port}"
+
+
+@pytest.fixture(scope="session")
+def api_request_context(
+    playwright: Playwright, base_url: str
+) -> Generator[APIRequestContext, None, None]:
+    """Provide a Playwright API request context for direct HTTP assertions.
+
+    Unlike ``page.goto()``, the API request context does not follow
+    redirects by default, making it ideal for verifying 302 responses
+    without attempting to resolve external hostnames.
+
+    Args:
+        playwright: The Playwright instance provided by pytest-playwright.
+        base_url: The base URL of the live server.
+
+    Yields:
+        An ``APIRequestContext`` bound to the live server.
+    """
+    context = playwright.request.new_context(base_url=base_url)
+    yield context
+    context.dispose()

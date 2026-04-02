@@ -3,12 +3,13 @@
 These tests exercise JavaScript behaviour and full browser rendering that
 the Flask test client cannot verify: theme and mode switching via
 JS-driven cookie writes and page reloads, cookie persistence across
-navigation, directory page DOM rendering, and category navigation.
+navigation, directory page DOM rendering, category navigation, and
+link redirect behaviour verified via Playwright's API request context.
 """
 
 from __future__ import annotations
 
-from playwright.sync_api import Page, expect
+from playwright.sync_api import APIRequestContext, Page, expect
 
 
 # ---------------------------------------------------------------------------
@@ -166,6 +167,42 @@ class TestDirectoryRendering:
         expect(
             page.locator(".category .link a", has_text="Stack Overflow")
         ).to_be_visible()
+
+
+# ---------------------------------------------------------------------------
+# Link redirects
+# ---------------------------------------------------------------------------
+
+
+class TestLinkRedirect:
+    """Verify that slug URLs issue 302 redirects to the configured URL.
+
+    Uses Playwright's API request context (not a browser page) to make
+    HTTP requests without following redirects, avoiding DNS resolution
+    of external hostnames that are unreachable in CI.
+    """
+
+    def test_top_level_link_redirects(
+        self, api_request_context: APIRequestContext
+    ) -> None:
+        """Navigating to /google returns a 302 to https://google.com."""
+        response = api_request_context.get("/google", max_redirects=0)
+        assert response.status == 302
+        assert response.headers.get("location") == "https://google.com"
+
+    def test_nested_link_redirects(
+        self, api_request_context: APIRequestContext
+    ) -> None:
+        """A link inside a category redirects from the top-level slug."""
+        response = api_request_context.get("/netflix", max_redirects=0)
+        assert response.status == 302
+        assert response.headers.get("location") == "https://netflix.com"
+
+    def test_alias_redirects(self, api_request_context: APIRequestContext) -> None:
+        """An alias slug redirects to the same URL as the primary name."""
+        response = api_request_context.get("/search", max_redirects=0)
+        assert response.status == 302
+        assert response.headers.get("location") == "https://google.com"
 
 
 # ---------------------------------------------------------------------------

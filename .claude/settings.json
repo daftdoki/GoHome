@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv self update 2>/dev/null; uv sync --all-extras 2>/dev/null; true"
+            "command": "uv self update 2>/dev/null; uv sync --all-extras 2>/dev/null; npm install -g markdownlint-cli2 2>/dev/null; uv run playwright install --with-deps webkit 2>/dev/null; uv run ruff format --check src/ tests/ scripts/ && uv run ruff check src/ tests/ scripts/ && uv run mypy src/ && uv run pytest && markdownlint-cli2 '**/*.md' && uv run yamllint sample_config/ docker-compose*.yml"
           }
         ]
       }

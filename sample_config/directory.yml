@@ -9,6 +9,8 @@ directory:
   - name: Wikipedia
     url: https://wikipedia.org
     description: The free encyclopedia
+    aliases:
+      - wiki
 
   - name: Streaming
     description: A category for streaming services
@@ -19,6 +21,8 @@ directory:
       - name: YouTube
         url: https://youtube.com
         description: Free video sharing platform
+        aliases:
+          - yt
 
   - name: Kagi
     url: https://kagi.com
@@ -35,3 +39,6 @@ directory:
       - name: Stack Overflow
         url: https://stackoverflow.com
         description: Q&A for programmers
+        aliases:
+          - so
+          - stackoverflow

@@ -3,7 +3,7 @@ revision = 3
 requires-python = ">=3.14"
 
 [options]
-exclude-newer = "2026-03-19T05:24:27.821286843Z"
+exclude-newer = "2026-03-22T23:25:23.153896Z"
 exclude-newer-span = "P2W"
 
 [[package]]
@@ -105,7 +105,7 @@ wheels = [
 
 [[package]]
 name = "gohome"
-version = "0.2.2.dev0"
+version = "0.2.2"
 source = { editable = "." }
 dependencies = [
     { name = "flask" },

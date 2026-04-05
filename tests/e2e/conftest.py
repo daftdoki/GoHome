@@ -9,6 +9,7 @@ for browser-based testing.  The ``base_url`` fixture lets tests call
 from __future__ import annotations
 
 import threading
+import urllib.request
 from collections.abc import Generator
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -67,11 +68,26 @@ def live_server() -> Generator[BaseWSGIServer, None, None]:
         The running ``BaseWSGIServer`` instance.
     """
     app = create_app(SAMPLE_CONFIG_DIR)
-    server: BaseWSGIServer = make_server("127.0.0.1", 0, app)
+    server: BaseWSGIServer = make_server("127.0.0.1", 0, app, threaded=True)
     thread = threading.Thread(
         target=server.serve_forever, daemon=True, name="e2e-server"
     )
     thread.start()
+
+    # Wait for the server to handle an HTTP request before yielding.
+    # make_server() binds the listening socket in its constructor, so
+    # TCP connections succeed immediately — but serve_forever() may not
+    # have entered its select loop yet.  An actual HTTP round-trip
+    # guarantees the server thread is processing requests.
+    host, port = server.server_address
+    url = f"http://{host}:{port}/"
+    for _ in range(50):
+        try:
+            urllib.request.urlopen(url, timeout=2)
+            break
+        except OSError:
+            threading.Event().wait(0.1)
+
     yield server
     server.shutdown()
 

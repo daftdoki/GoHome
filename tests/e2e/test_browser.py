@@ -24,7 +24,7 @@ class TestThemeSwitching:
         """Selecting a theme reloads the page with the new theme CSS."""
         page.goto("/")
 
-        with page.expect_navigation():
+        with page.expect_event("load"):
             page.select_option("#theme-select", "retro-green")
 
         href = page.locator("link[rel='stylesheet']").get_attribute("href")
@@ -35,7 +35,7 @@ class TestThemeSwitching:
         """Selecting a theme sets the ``gohome_theme`` cookie."""
         page.goto("/")
 
-        with page.expect_navigation():
+        with page.expect_event("load"):
             page.select_option("#theme-select", "retro-amber")
 
         cookies = page.context.cookies()
@@ -56,7 +56,7 @@ class TestModeSwitching:
         """Selecting 'Dark' adds the ``dark`` class to ``<body>``."""
         page.goto("/")
 
-        with page.expect_navigation():
+        with page.expect_event("load"):
             page.select_option("#mode-select", "dark")
 
         expect(page.locator("body")).to_have_class("dark")
@@ -65,7 +65,7 @@ class TestModeSwitching:
         """Selecting 'Light' adds the ``light`` class to ``<body>``."""
         page.goto("/")
 
-        with page.expect_navigation():
+        with page.expect_event("load"):
             page.select_option("#mode-select", "light")
 
         expect(page.locator("body")).to_have_class("light")
@@ -75,11 +75,11 @@ class TestModeSwitching:
         page.goto("/")
 
         # First set dark mode
-        with page.expect_navigation():
+        with page.expect_event("load"):
             page.select_option("#mode-select", "dark")
 
         # Then switch to Auto
-        with page.expect_navigation():
+        with page.expect_event("load"):
             page.select_option("#mode-select", "")
 
         body_class = page.locator("body").get_attribute("class") or ""
@@ -103,7 +103,7 @@ class TestCookiePersistence:
         """Theme selection persists when navigating to a category page."""
         page.goto("/")
 
-        with page.expect_navigation():
+        with page.expect_event("load"):
             page.select_option("#theme-select", "retro-amber")
 
         # Navigate to category page
@@ -117,7 +117,7 @@ class TestCookiePersistence:
         """Mode selection persists when navigating to a category page."""
         page.goto("/")
 
-        with page.expect_navigation():
+        with page.expect_event("load"):
             page.select_option("#mode-select", "dark")
 
         page.goto("/streaming")

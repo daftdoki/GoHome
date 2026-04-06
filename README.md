@@ -381,6 +381,21 @@ Use the footer controls to switch themes (dropdown) and set
 light/dark/auto mode. Preferences are stored in cookies. Auto follows
 the browser's `prefers-color-scheme` setting and is the default.
 
+### Tailscale User Identity
+
+When deployed behind Tailscale serve (the default Docker Compose
+setup), GoHome displays the logged-in Tailscale user's name and login
+in the page footer. This lets everyone on the tailnet see which
+account they are browsing as.
+
+This feature is only active when GoHome listens exclusively on
+localhost (`127.0.0.1`, `::1`, or `localhost`), which is the case in
+the standard Tailscale deployment. The localhost restriction ensures
+that identity headers can only come from the trusted Tailscale serve
+proxy, preventing header injection from untrusted sources. When
+GoHome binds to all interfaces (the default for standalone
+deployments), the identity display is automatically disabled.
+
 ## Configuration Reference
 
 ### Configuration Directory

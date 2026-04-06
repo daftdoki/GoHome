@@ -106,7 +106,7 @@ def start_server(config_dir: str, port: int) -> tuple[threading.Thread, BaseWSGI
     from gohome import create_app  # type: ignore[import-untyped]
 
     app = create_app(config_dir)
-    server: BaseWSGIServer = make_server("127.0.0.1", port, app)
+    server: BaseWSGIServer = make_server("127.0.0.1", port, app, threaded=True)
 
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()

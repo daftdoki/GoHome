@@ -201,8 +201,8 @@ links together. The `description` and `aliases` fields are optional.
 
 Use `aliases` to create shorthand URLs for a link — for example, the
 sample config sets `search` as an alias for Google, so both
-`go/google` and `go/search` reach the same destination. Aliases are
-displayed in the web UI for discoverability.
+`go/google` and `go/search` reach the same destination. Each entry
+shows its slug and any alias slugs inline for discoverability.
 
 A minimal file with just one link looks like this:
 
@@ -454,7 +454,8 @@ redirect to the same URL. Each alias is normalized and registered as
 its own slug, so `go/search` and `go/google` can point to the same
 destination. Aliases are displayed beneath the entry in the web UI
 for discoverability. Alias slugs must be globally unique — they
-cannot collide with any other name or alias.
+cannot collide with any other name or alias. Each entry displays its
+primary slug and alias slugs inline (e.g., `google, search, gsearch`).
 
 ```yaml
 - name: Google

@@ -103,6 +103,7 @@
         </div>
         {% if tailscale_user_name or tailscale_user_login %}
         <div class="tailscale-user">
+            Tailscale ID:
             {% if tailscale_user_name %}{{ tailscale_user_name }}{% endif %}
             {% if tailscale_user_name and tailscale_user_login %} &mdash; {% endif %}
             {% if tailscale_user_login %}{{ tailscale_user_login }}{% endif %}

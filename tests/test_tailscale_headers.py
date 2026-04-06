@@ -81,6 +81,7 @@ class TestTailscaleHeadersLocalhost:
         html = localhost_client.get("/", headers=_TS_HEADERS).get_data(
             as_text=True,
         )
+        assert "Tailscale ID:" in html
         assert "Alice Smith" in html
         assert "alice@example.com" in html
         assert "tailscale-user" in html

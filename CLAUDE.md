@@ -130,6 +130,12 @@ uv run python scripts/generate_screenshots.py
 - **Adding a bundled theme**: copy the CSS to `src/gohome/static/` and
   add the name to `BUNDLED_THEMES` in `themes.py`
 - **Cookies**: Server reads but never sets cookies; JS handles writes
+- **Tailscale identity**: When `AppConfig.host` is a loopback address
+  (`127.0.0.1`, `::1`, `localhost`), a context processor reads
+  `Tailscale-User-Login` and `Tailscale-User-Name` from request headers
+  and injects them into the template footer.  This is only active when
+  listening on localhost, since the Tailscale serve proxy guarantees
+  those headers are trustworthy when it is the only path to the server.
 
 ## Coding Conventions
 

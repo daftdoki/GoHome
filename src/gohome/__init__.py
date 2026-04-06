@@ -13,7 +13,7 @@ import importlib.metadata
 import logging
 from typing import Any
 
-from flask import Flask
+from flask import Flask, request
 
 from gohome.config import load_app_config, load_directory
 from gohome.models import AppConfig, CategoryEntry, Directory
@@ -68,5 +68,20 @@ def create_app(config_dir: str = ".") -> Flask:
     def _inject_version() -> dict[str, str]:
         """Make ``gohome_version`` available in all templates."""
         return {"gohome_version": gohome_version}
+
+    @app.context_processor
+    def _inject_tailscale_identity() -> dict[str, str | None]:
+        """Make Tailscale user identity available in templates.
+
+        Only reads ``Tailscale-User-Login`` and ``Tailscale-User-Name``
+        headers when the server listens on localhost, preventing header
+        injection from untrusted sources.
+        """
+        if app_config.is_localhost:
+            return {
+                "tailscale_user_login": request.headers.get("Tailscale-User-Login"),
+                "tailscale_user_name": request.headers.get("Tailscale-User-Name"),
+            }
+        return {"tailscale_user_login": None, "tailscale_user_name": None}
 
     return app

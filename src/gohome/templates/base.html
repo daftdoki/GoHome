@@ -101,6 +101,13 @@
                 <option value="dark"{% if active_mode == 'dark' %} selected{% endif %}>Dark</option>
             </select>
         </div>
+        {% if tailscale_user_name or tailscale_user_login %}
+        <div class="tailscale-user">
+            {% if tailscale_user_name %}{{ tailscale_user_name }}{% endif %}
+            {% if tailscale_user_name and tailscale_user_login %} &mdash; {% endif %}
+            {% if tailscale_user_login %}{{ tailscale_user_login }}{% endif %}
+        </div>
+        {% endif %}
         <div class="version-info">
             GoHome Version {{ gohome_version }} — <a href="https://github.com/daftdoki/GoHome">github.com/daftdoki/GoHome</a>
         </div>

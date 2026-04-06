@@ -91,3 +91,13 @@ class AppConfig:
     log_level: str = "info"
     default_theme: str = "default"
     config_dir: str = "."
+
+    @property
+    def is_localhost(self) -> bool:
+        """Whether the server listens only on a loopback address.
+
+        Returns True when ``host`` is ``127.0.0.1``, ``::1``, or
+        ``localhost``, meaning connections can only arrive from the
+        local machine (e.g. via a Tailscale serve proxy).
+        """
+        return self.host in ("127.0.0.1", "::1", "localhost")

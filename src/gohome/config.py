@@ -144,27 +144,17 @@ def _register_aliases(
     name: str,
     item: DirectoryItem,
     slug_map: dict[str, DirectoryItem],
-) -> list[str]:
-    """Normalize and register each alias in the slug map.
-
-    Returns the list of alias slugs so callers can update references
-    after rebuilding an item (e.g. categories with populated children).
+) -> None:
+    """Register pre-normalized alias slugs in the slug map.
 
     Args:
-        aliases: Display-name alias strings to register.
+        aliases: Pre-normalized alias slugs to register.
         name: The primary entry name (for error messages).
         item: The directory item the aliases point to.
         slug_map: The slug-to-item mapping being built.
-
-    Returns:
-        The normalized slug for each alias, in order.
     """
-    alias_slugs: list[str] = []
-    for alias in aliases:
-        alias_slug = normalize_name(alias)
-        _register_slug(alias_slug, f"alias '{alias}' of '{name}'", item, slug_map)
-        alias_slugs.append(alias_slug)
-    return alias_slugs
+    for alias_slug in aliases:
+        _register_slug(alias_slug, f"alias '{alias_slug}' of '{name}'", item, slug_map)
 
 
 def _register_slug(
@@ -239,7 +229,7 @@ def _process_entry(
         if not isinstance(alias_val, str) or not alias_val.strip():
             logger.error("Entry %r has invalid alias: %r", name, alias_val)
             sys.exit(1)
-    aliases = tuple(raw_aliases)
+    aliases = tuple(normalize_name(str(a)) for a in raw_aliases)
 
     # Category (entries key present — url is ignored if both exist)
     if has_entries:
@@ -265,7 +255,7 @@ def _process_entry(
             aliases=aliases,
         )
         _register_slug(slug, str(name), cat, slug_map)
-        alias_slugs = _register_aliases(aliases, str(name), cat, slug_map)
+        _register_aliases(aliases, str(name), cat, slug_map)
 
         for child_entry in raw_children:
             _process_entry(child_entry, child_items, slug_map, nested=True)
@@ -280,7 +270,7 @@ def _process_entry(
         )
         # Update slug_map to point to the fully-built category
         slug_map[slug] = cat
-        for alias_slug in alias_slugs:
+        for alias_slug in aliases:
             slug_map[alias_slug] = cat
         items.append(cat)
     else:

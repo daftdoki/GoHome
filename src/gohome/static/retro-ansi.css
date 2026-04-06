@@ -213,10 +213,16 @@ header {
 }
 
 header h1,
-header nav {
+.nav-row {
     max-width: var(--max-width);
     margin-left: auto;
     margin-right: auto;
+}
+
+.nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
 }
 
 /* ------------------------------------------------------------------ */
@@ -292,10 +298,9 @@ header h1::after {
 }
 
 .description {
-    display: block;
+    display: inline;
     color: var(--color-text-muted);
     font-size: 0.85rem;
-    padding-left: 1.75rem;
     text-shadow: none;
 }
 
@@ -394,10 +399,8 @@ header h1::after {
 /* Category navigation (anchor links at top of root page)             */
 /* ------------------------------------------------------------------ */
 .category-nav {
-    margin-bottom: var(--spacing);
     font-size: 0.85rem;
     color: var(--color-text-muted);
-    line-height: 1.8;
     text-shadow: none;
 }
 

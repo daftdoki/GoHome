@@ -15,26 +15,28 @@
 <body class="{{ active_mode }}" id="top">
     <header>
         <h1>{{ site_title }}</h1>
-        <nav class="breadcrumbs">
-            {% for label, url in breadcrumbs %}
-                {% if not loop.last %}
-                    <a href="{{ url }}">{{ label }}</a> &gt;
-                {% else %}
-                    <span>{{ label }}</span>
-                {% endif %}
-            {% endfor %}
-        </nav>
+        <div class="nav-row">
+            <nav class="breadcrumbs">
+                {% for label, url in breadcrumbs %}
+                    {% if not loop.last %}
+                        <a href="{{ url }}">{{ label }}</a> &gt;
+                    {% else %}
+                        <span>{{ label }}</span>
+                    {% endif %}
+                {% endfor %}
+            </nav>
+            {% if not page_title %}
+            <nav class="category-nav" aria-label="Category navigation">
+                Categories:
+                {% for item in items if item is category %}
+                    {% if not loop.first %}, {% endif %}<a href="#{{ item.slug }}">{{ item.name }}</a>
+                {% endfor %}
+            </nav>
+            {% endif %}
+        </div>
     </header>
 
     <main>
-        {% if not page_title %}
-        <nav class="category-nav" aria-label="Category navigation">
-            Categories:
-            {% for item in items if item is category %}
-                {% if not loop.first %}, {% endif %}<a href="#{{ item.slug }}">{{ item.name }}</a>
-            {% endfor %}
-        </nav>
-        {% endif %}
 
         {% if page_title %}
         <h2>{{ page_title }}</h2>
@@ -50,23 +52,19 @@
                 <details open>
                     <summary>
                         <h2>{{ item.name }} <a href="/{{ item.slug }}" class="category-link" title="Go to {{ item.name }}">&#x2197;</a></h2>
+                        {% if item.description %}
+                        <span class="description"> - {{ item.description }}</span>
+                        {% endif %}
                     </summary>
-                    {% if item.description %}
-                    <p class="category-description">{{ item.description }}</p>
-                    {% endif %}
-                    {% if item.aliases %}
-                    <p class="aliases">Also: {{ item.aliases | join(", ") }}</p>
-                    {% endif %}
+                    <p class="aliases">{{ item.slug }}{% for alias in item.aliases %}, {{ alias }}{% endfor %}</p>
                     <ul>
                     {% for link in item.entries %}
                         <li class="link">
                             <a href="{{ link.url }}">{{ link.name }}</a>
                             {% if link.description %}
-                            <span class="description">{{ link.description }}</span>
+                            <span class="description"> - {{ link.description }}</span>
                             {% endif %}
-                            {% if link.aliases %}
-                            <span class="aliases">Also: {{ link.aliases | join(", ") }}</span>
-                            {% endif %}
+                            <span class="aliases">{{ link.slug }}{% for alias in link.aliases %}, {{ alias }}{% endfor %}</span>
                         </li>
                     {% endfor %}
                     </ul>
@@ -79,11 +77,9 @@
             <li class="link">
                 <a href="{{ item.url }}">{{ item.name }}</a>
                 {% if item.description %}
-                <span class="description">{{ item.description }}</span>
+                <span class="description"> - {{ item.description }}</span>
                 {% endif %}
-                {% if item.aliases %}
-                <span class="aliases">Also: {{ item.aliases | join(", ") }}</span>
-                {% endif %}
+                <span class="aliases">{{ item.slug }}{% for alias in item.aliases %}, {{ alias }}{% endfor %}</span>
             </li>
             {% endif %}
         {% endfor %}

@@ -40,30 +40,52 @@ class TestRootTemplate:
         assert "YouTube" in html
 
     def test_descriptions_rendered(self, client: FlaskClient) -> None:
-        """Link and category descriptions appear in the HTML."""
+        """Link and category descriptions appear inline with ' - ' prefix."""
         html = client.get("/").get_data(as_text=True)
-        assert "A search engine" in html
-        assert "Video services" in html
+        assert " - A search engine" in html
+        assert " - Video services" in html
 
-    def test_aliases_rendered(self, client: FlaskClient) -> None:
-        """Aliases appear in the rendered HTML with the 'Also:' prefix."""
+    def test_slugs_rendered_with_aliases(self, client: FlaskClient) -> None:
+        """Entries with aliases show primary slug and alias slugs."""
         html = client.get("/").get_data(as_text=True)
-        assert "Also: search" in html
+        assert "google, search" in html
 
-    def test_nested_aliases_rendered(self, client: FlaskClient) -> None:
-        """Aliases on nested links appear in the rendered HTML."""
+    def test_nested_slugs_rendered(self, client: FlaskClient) -> None:
+        """Nested link aliases show primary slug and alias slugs."""
         html = client.get("/").get_data(as_text=True)
-        assert "Also: nf" in html
+        assert "netflix, nf" in html
 
-    def test_no_aliases_no_also_text(self, client: FlaskClient) -> None:
-        """Entries without aliases do not render 'Also:' text."""
+    def test_no_also_prefix(self, client: FlaskClient) -> None:
+        """The 'Also:' prefix is no longer used."""
         html = client.get("/").get_data(as_text=True)
-        assert html.count("Also:") == 2  # only Google and Netflix have aliases
+        assert "Also:" not in html
+
+    def test_primary_slug_always_shown(self, client: FlaskClient) -> None:
+        """Every entry shows at least its primary slug."""
+        html = client.get("/").get_data(as_text=True)
+        for slug in ("google", "kagi", "netflix", "youtube", "streaming"):
+            assert slug in html
+
+    def test_description_inline_with_link(self, client: FlaskClient) -> None:
+        """Descriptions appear inline with the link name, prefixed by ' - '."""
+        html = client.get("/").get_data(as_text=True)
+        assert " - A search engine" in html
 
     def test_breadcrumbs_root(self, client: FlaskClient) -> None:
         """The root page shows 'Home' as plain text (no link)."""
         html = client.get("/").get_data(as_text=True)
         assert "<span>Home</span>" in html
+
+    def test_category_nav_in_header(self, client: FlaskClient) -> None:
+        """The category nav is inside the header, not in main."""
+        html = client.get("/").get_data(as_text=True)
+        header_start = html.index("<header>")
+        header_end = html.index("</header>")
+        main_start = html.index("<main>")
+        main_end = html.index("</main>")
+        cat_nav_pos = html.index('class="category-nav"')
+        assert header_start < cat_nav_pos < header_end
+        assert not (main_start < cat_nav_pos < main_end)
 
     def test_meta_charset(self, client: FlaskClient) -> None:
         """The template includes a charset meta tag."""

@@ -154,9 +154,9 @@ class TestDirectoryRendering:
         ).to_be_visible()
 
     def test_aliases_visible(self, page: Page) -> None:
-        """Alias labels are rendered for links that have them."""
+        """Slug labels show primary slug and alias slugs."""
         page.goto("/")
-        expect(page.locator(".aliases", has_text="search")).to_be_visible()
+        expect(page.locator(".aliases", has_text="google, search")).to_be_visible()
 
     def test_nested_links_visible(self, page: Page) -> None:
         """Links nested inside categories are visible on the root page."""

@@ -714,6 +714,7 @@ src/gohome/
     ├── retro-green.css  # Bundled retro green phosphor theme
     ├── retro-amber.css  # Bundled retro amber phosphor theme
     ├── retro-ansi.css   # Bundled retro ANSI/arcade theme
+    ├── data-general.css # Bundled Data General minicomputer theme
     ├── favicon.ico      # Favicon
     └── gohome.js        # Client-side theme/mode JS
 ```
@@ -726,3 +727,4 @@ src/gohome/
 | Retro Green | ![Retro green light](docs/screenshots/retro-green-light.png) | ![Retro green dark](docs/screenshots/retro-green-dark.png) |
 | Retro Amber | ![Retro amber light](docs/screenshots/retro-amber-light.png) | ![Retro amber dark](docs/screenshots/retro-amber-dark.png) |
 | Retro ANSI | ![Retro ANSI light](docs/screenshots/retro-ansi-light.png) | ![Retro ANSI dark](docs/screenshots/retro-ansi-dark.png) |
+| Data General | ![Data General light](docs/screenshots/data-general-light.png) | ![Data General dark](docs/screenshots/data-general-dark.png) |

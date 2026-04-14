@@ -15,6 +15,7 @@ BUNDLED_THEMES: tuple[str, ...] = (
     "retro-green",
     "retro-amber",
     "retro-ansi",
+    "data-general",
 )
 """Names of themes shipped with GoHome, in display order.
 
@@ -24,6 +25,7 @@ Bundled themes:
 - ``retro-green``: classic green phosphor CRT terminal
 - ``retro-amber``: classic amber phosphor CRT terminal
 - ``retro-ansi``: multi-color ANSI terminal palette
+- ``data-general``: Data General Nova/Eclipse minicomputer aesthetic
 
 These are served from the application's static directory.  Custom
 themes in the config directory cannot use these names.

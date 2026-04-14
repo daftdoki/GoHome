@@ -1,0 +1,511 @@
+/* GoHome — Data General Theme
+ *
+ * Inspired by the iconic Data General Nova and Eclipse minicomputers
+ * of the late 1970s: cobalt blue cabinets, warm cream accent panels,
+ * and DASHER terminal displays.
+ *
+ * Dark mode: blue phosphor on deep navy (DASHER terminal CRT)
+ * Light mode: cobalt blue ink on warm cream (the cabinet panels)
+ *
+ * Custom themes are fully self-contained and do not inherit from the
+ * default theme.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Custom properties — dark mode (default)                            */
+/* ------------------------------------------------------------------ */
+:root {
+    --color-bg: #06091a;
+    --color-text: #50b8e8;
+    --color-text-muted: #286898;
+    --color-link: #60ccff;
+    --color-link-hover: #ede0c8;
+    --color-border: #1a3d88;
+    --color-header-bg: #06091a;
+    --color-footer-bg: #06091a;
+    --color-category-bg: #040714;
+    --color-glow: rgba(80, 184, 232, 0.35);
+    --color-glow-strong: rgba(96, 204, 255, 0.6);
+    --color-scanline: rgba(0, 0, 0, 0.18);
+    --font-family: "Courier New", Courier, monospace;
+    --max-width: 60rem;
+    --spacing: 1rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Light mode via .light body class                                   */
+/* ------------------------------------------------------------------ */
+body.light {
+    --color-bg: #f0ead8;
+    --color-text: #1a3568;
+    --color-text-muted: #4a6898;
+    --color-link: #1a4898;
+    --color-link-hover: #0a1e48;
+    --color-border: #88a8cc;
+    --color-header-bg: #f0ead8;
+    --color-footer-bg: #f0ead8;
+    --color-category-bg: #e5dcc8;
+    --color-glow: transparent;
+    --color-glow-strong: transparent;
+    --color-scanline: rgba(0, 0, 0, 0.04);
+}
+
+/* ------------------------------------------------------------------ */
+/* Dark mode via .dark body class (same as :root default)             */
+/* ------------------------------------------------------------------ */
+body.dark {
+    --color-bg: #06091a;
+    --color-text: #50b8e8;
+    --color-text-muted: #286898;
+    --color-link: #60ccff;
+    --color-link-hover: #ede0c8;
+    --color-border: #1a3d88;
+    --color-header-bg: #06091a;
+    --color-footer-bg: #06091a;
+    --color-category-bg: #040714;
+    --color-glow: rgba(80, 184, 232, 0.35);
+    --color-glow-strong: rgba(96, 204, 255, 0.6);
+    --color-scanline: rgba(0, 0, 0, 0.18);
+}
+
+/* ------------------------------------------------------------------ */
+/* Browser prefers-color-scheme fallback (no class on body)           */
+/* ------------------------------------------------------------------ */
+@media (prefers-color-scheme: light) {
+    body:not(.light):not(.dark) {
+        --color-bg: #f0ead8;
+        --color-text: #1a3568;
+        --color-text-muted: #4a6898;
+        --color-link: #1a4898;
+        --color-link-hover: #0a1e48;
+        --color-border: #88a8cc;
+        --color-header-bg: #f0ead8;
+        --color-footer-bg: #f0ead8;
+        --color-category-bg: #e5dcc8;
+        --color-glow: transparent;
+        --color-glow-strong: transparent;
+        --color-scanline: rgba(0, 0, 0, 0.04);
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* Screen flicker animation                                           */
+/* ------------------------------------------------------------------ */
+@keyframes crt-flicker {
+    0%, 95%, 100% { opacity: 1; }
+    96%           { opacity: 0.96; }
+    97%           { opacity: 1; }
+    98%           { opacity: 0.94; }
+    99%           { opacity: 0.98; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Base styles                                                        */
+/* ------------------------------------------------------------------ */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    text-shadow: 0 0 6px var(--color-glow);
+    animation: crt-flicker 10s infinite;
+
+    /* Subtle vignette — darker at edges like a real CRT tube */
+    background-image: radial-gradient(
+        ellipse at center,
+        transparent 60%,
+        rgba(0, 0, 0, 0.55) 100%
+    );
+    background-attachment: fixed;
+}
+
+/* Scanline overlay — fixed so it covers the full viewport */
+body::after {
+    content: "";
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 3px,
+        var(--color-scanline) 3px,
+        var(--color-scanline) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* ------------------------------------------------------------------ */
+/* Typography                                                         */
+/* ------------------------------------------------------------------ */
+h1, h2, h3 {
+    font-family: var(--font-family);
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 10px var(--color-glow-strong);
+}
+
+h1 {
+    font-size: 1.5rem;
+    margin: 0 0 0.25rem;
+    text-transform: uppercase;
+}
+
+h2 {
+    font-size: 1.1rem;
+    margin: 0 0 0.25rem;
+}
+
+a {
+    color: var(--color-link);
+    text-decoration: none;
+    text-shadow: 0 0 8px var(--color-glow-strong);
+}
+
+a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+    text-shadow: 0 0 12px var(--color-glow-strong), 0 0 2px #fff;
+}
+
+/* ------------------------------------------------------------------ */
+/* Layout                                                             */
+/* ------------------------------------------------------------------ */
+header,
+main,
+footer {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--spacing);
+}
+
+header {
+    background-color: var(--color-header-bg);
+    border-bottom: 1px solid var(--color-border);
+    max-width: 100%;
+    margin-bottom: var(--spacing);
+    box-shadow: 0 1px 8px var(--color-glow);
+}
+
+header h1,
+.nav-row {
+    max-width: var(--max-width);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+/* ------------------------------------------------------------------ */
+/* Cursor blink on site title                                         */
+/* ------------------------------------------------------------------ */
+@keyframes blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+
+header h1::after {
+    content: "_";
+    display: inline-block;
+    margin-left: 2px;
+    animation: blink 1.1s step-end infinite;
+}
+
+/* ------------------------------------------------------------------ */
+/* Breadcrumbs                                                        */
+/* ------------------------------------------------------------------ */
+.breadcrumbs {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    letter-spacing: 0.04em;
+    text-shadow: none;
+}
+
+.breadcrumbs::before {
+    content: "> ";
+    color: var(--color-text-muted);
+}
+
+.breadcrumbs a {
+    color: var(--color-text-muted);
+    text-shadow: none;
+}
+
+.breadcrumbs a:hover {
+    color: var(--color-link);
+    text-shadow: 0 0 6px var(--color-glow);
+}
+
+/* ------------------------------------------------------------------ */
+/* Directory listing                                                  */
+/* ------------------------------------------------------------------ */
+.directory {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.directory > .link {
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* ASCII-style prompt prefix on all links */
+.directory .link::before {
+    content: "  >> ";
+    color: var(--color-text-muted);
+}
+
+.directory .link a {
+    color: var(--color-link);
+    font-weight: bold;
+    text-shadow: 0 0 8px var(--color-glow-strong);
+}
+
+.directory .link a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+    text-shadow: 0 0 14px var(--color-glow-strong), 0 0 2px #fff;
+}
+
+.description {
+    display: inline;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    text-shadow: none;
+}
+
+.aliases {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    font-style: italic;
+    padding-left: 1.75rem;
+    text-shadow: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Categories — ASCII box border style                                */
+/* ------------------------------------------------------------------ */
+.category {
+    margin-bottom: calc(var(--spacing) * 1.25);
+    padding: var(--spacing);
+    background-color: var(--color-category-bg);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 0 8px var(--color-glow), inset 0 0 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Category title bar — full-width header inside the box */
+.category summary {
+    margin: calc(-1 * var(--spacing)) calc(-1 * var(--spacing)) 0.75rem;
+    padding: 0.4rem var(--spacing);
+    border-bottom: 1px solid var(--color-border);
+    cursor: pointer;
+    list-style: none;
+    color: var(--color-text);
+    text-shadow: 0 0 10px var(--color-glow-strong);
+}
+
+.category summary::-webkit-details-marker {
+    display: none;
+}
+
+.category summary::before {
+    content: "\25BC";
+    display: inline-block;
+    margin-right: 0.5rem;
+    font-size: 0.7em;
+    color: var(--color-text-muted);
+}
+
+.category details:not([open]) summary::before {
+    content: "\25B6";
+}
+
+.category details:not([open]) summary {
+    margin-bottom: calc(-1 * var(--spacing));
+    border-bottom: none;
+}
+
+.category h2 {
+    display: inline;
+    margin: 0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.category-link {
+    font-size: 0.75em;
+    font-weight: normal;
+    margin-left: 0.3rem;
+    color: var(--color-text);
+    text-shadow: 0 0 10px var(--color-glow-strong);
+    text-decoration: none;
+}
+
+.category-link:hover {
+    color: var(--color-link-hover);
+    text-shadow: 0 0 14px var(--color-glow-strong), 0 0 2px #fff;
+}
+
+.category-description {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    margin: 0 0 0.5rem;
+    text-shadow: none;
+}
+
+.category ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 1px dashed var(--color-border);
+    padding-top: 0.4rem;
+    margin-top: 0.4rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Category navigation (anchor links at top of root page)             */
+/* ------------------------------------------------------------------ */
+.category-nav {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    text-shadow: none;
+}
+
+.category-nav a {
+    color: var(--color-link);
+    text-decoration: none;
+    text-shadow: 0 0 8px var(--color-glow-strong);
+}
+
+.category-nav a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+    text-shadow: 0 0 12px var(--color-glow-strong), 0 0 2px #fff;
+}
+
+/* ------------------------------------------------------------------ */
+/* Back to top                                                        */
+/* ------------------------------------------------------------------ */
+.back-to-top {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    text-align: right;
+    text-shadow: none;
+}
+
+.back-to-top a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+}
+
+.back-to-top a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+    text-shadow: 0 0 8px var(--color-glow);
+}
+
+/* ------------------------------------------------------------------ */
+/* Footer                                                             */
+/* ------------------------------------------------------------------ */
+footer {
+    margin-top: calc(var(--spacing) * 2);
+    border-top: 1px solid var(--color-border);
+    box-shadow: 0 -1px 8px var(--color-glow);
+}
+
+footer::before {
+    content: "[ SYSTEM CONTROLS ]";
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+    text-shadow: none;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.controls label {
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-shadow: none;
+}
+
+.controls select,
+.controls button {
+    font-family: var(--font-family);
+    font-size: 0.85rem;
+    padding: 0.2rem 0.6rem;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    text-shadow: 0 0 4px var(--color-glow);
+    box-shadow: 0 0 4px var(--color-glow);
+    /* Remove default browser select appearance for a flat terminal look */
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.controls select:focus,
+.controls button:focus {
+    outline: 1px solid var(--color-link);
+    box-shadow: 0 0 8px var(--color-glow-strong);
+}
+
+.controls button:hover {
+    background-color: var(--color-text);
+    color: var(--color-bg);
+    text-shadow: none;
+    box-shadow: 0 0 12px var(--color-glow-strong);
+}
+
+.version-info {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    text-align: center;
+    text-shadow: none;
+    letter-spacing: 0.04em;
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive                                                         */
+/* ------------------------------------------------------------------ */
+@media (max-width: 640px) {
+    h1 {
+        font-size: 1.1rem;
+    }
+
+    .category {
+        padding: 0.75rem;
+    }
+
+    .controls {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+}

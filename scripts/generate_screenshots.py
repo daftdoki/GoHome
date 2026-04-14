@@ -84,6 +84,18 @@ SCREENSHOTS: list[ScreenshotSpec] = [
     ScreenshotSpec(
         "retro-ansi-dark.png", "retro-ansi", "dark", "Retro ANSI terminal, dark mode"
     ),
+    ScreenshotSpec(
+        "data-general-light.png",
+        "data-general",
+        "light",
+        "Data General minicomputer, light mode",
+    ),
+    ScreenshotSpec(
+        "data-general-dark.png",
+        "data-general",
+        "dark",
+        "Data General minicomputer, dark mode",
+    ),
 ]
 
 

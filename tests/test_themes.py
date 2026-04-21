@@ -30,6 +30,10 @@ class TestBundledThemes:
         """'retro-ansi' is a bundled theme."""
         assert "retro-ansi" in BUNDLED_THEMES
 
+    def test_data_general_is_bundled(self) -> None:
+        """'data-general' is a bundled theme."""
+        assert "data-general" in BUNDLED_THEMES
+
 
 class TestDiscoverThemes:
     """Verify theme discovery from config directories."""
@@ -140,6 +144,14 @@ class TestThemeCSSRoute:
     ) -> None:
         """The bundled retro-ansi theme is served from the static endpoint."""
         response = client.get("/static/retro-ansi.css")
+        assert response.status_code == 200
+        assert "text/css" in response.content_type
+
+    def test_bundled_data_general_css_served_from_static(
+        self, client: FlaskClient
+    ) -> None:
+        """The bundled data-general theme is served from the static endpoint."""
+        response = client.get("/static/data-general.css")
         assert response.status_code == 200
         assert "text/css" in response.content_type
 

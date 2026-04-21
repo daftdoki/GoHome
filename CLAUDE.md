@@ -100,7 +100,7 @@ uv run python scripts/generate_screenshots.py
   - `themes.py` — Theme discovery
   - `templates/base.html` — Single Jinja2 template
   - `static/` — Bundled CSS (`default.css`, `retro-green.css`,
-    `retro-amber.css`, `retro-ansi.css`), JS, favicon
+    `retro-amber.css`, `retro-ansi.css`, `data-general.css`), JS, favicon
 - `tests/` — Test suite (pytest)
   - `e2e/` — E2E browser tests (pytest-playwright)
 - `docs/` — Documentation and requirements

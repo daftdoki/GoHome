@@ -1,0 +1,445 @@
+/* GoHome — Data General Theme
+ *
+ * Inspired by the industrial design of Data General Nova and Eclipse
+ * minicomputers: cobalt blue cabinet panels, warm cream housings, and
+ * clean sans-serif equipment labeling from the late 1970s.
+ *
+ * Light mode: cream panels with cobalt blue structure (the hardware)
+ * Dark mode: deep navy with cream text (the server room at night)
+ *
+ * This theme evokes the physical machines, not their CRT terminals.
+ * No scanlines, no phosphor glow — just clean industrial geometry.
+ *
+ * Custom themes are fully self-contained and do not inherit from the
+ * default theme.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Custom properties — light mode (default)                           */
+/* ------------------------------------------------------------------ */
+:root {
+    --color-bg: #ebe3d0;
+    --color-text: #1c2840;
+    --color-text-muted: #5c6878;
+    --color-link: #1b4488;
+    --color-link-hover: #0e2a5c;
+    --color-border: #c8bda6;
+    --color-header-bg: #1b4488;
+    --color-footer-bg: #ebe3d0;
+    --color-category-bg: #e2d9c5;
+    --color-accent: #1b4488;
+    --color-panel-text: #ebe3d0;
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif;
+    --max-width: 48rem;
+    --spacing: 1rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Light mode via .light body class (explicit)                        */
+/* ------------------------------------------------------------------ */
+body.light {
+    --color-bg: #ebe3d0;
+    --color-text: #1c2840;
+    --color-text-muted: #5c6878;
+    --color-link: #1b4488;
+    --color-link-hover: #0e2a5c;
+    --color-border: #c8bda6;
+    --color-header-bg: #1b4488;
+    --color-footer-bg: #ebe3d0;
+    --color-category-bg: #e2d9c5;
+    --color-accent: #1b4488;
+    --color-panel-text: #ebe3d0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Dark mode via body class                                           */
+/* ------------------------------------------------------------------ */
+body.dark {
+    --color-bg: #0e1828;
+    --color-text: #d5cab4;
+    --color-text-muted: #7888a0;
+    --color-link: #6898d0;
+    --color-link-hover: #e0d4bc;
+    --color-border: #243040;
+    --color-header-bg: #1b4488;
+    --color-footer-bg: #0e1828;
+    --color-category-bg: #142030;
+    --color-accent: #2858a0;
+    --color-panel-text: #ebe3d0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Browser preference fallback (no class on body)                     */
+/* ------------------------------------------------------------------ */
+@media (prefers-color-scheme: dark) {
+    body:not(.light):not(.dark) {
+        --color-bg: #0e1828;
+        --color-text: #d5cab4;
+        --color-text-muted: #7888a0;
+        --color-link: #6898d0;
+        --color-link-hover: #e0d4bc;
+        --color-border: #243040;
+        --color-header-bg: #1b4488;
+        --color-footer-bg: #0e1828;
+        --color-category-bg: #142030;
+        --color-accent: #2858a0;
+        --color-panel-text: #ebe3d0;
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* Base styles                                                        */
+/* ------------------------------------------------------------------ */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.6;
+}
+
+/* ------------------------------------------------------------------ */
+/* Typography                                                         */
+/* ------------------------------------------------------------------ */
+h1, h2, h3 {
+    font-family: var(--font-family);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+h1 {
+    font-size: 1.5rem;
+    margin-top: 0;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+}
+
+h2 {
+    font-size: 1.1rem;
+    margin: 0 0 0.25rem;
+}
+
+a {
+    color: var(--color-link);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+}
+
+/* ------------------------------------------------------------------ */
+/* Layout                                                             */
+/* ------------------------------------------------------------------ */
+header,
+main,
+footer {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--spacing);
+}
+
+/* Header — cobalt blue panel, like the painted cabinet face.        */
+/* The blue persists across light/dark: paint doesn't change in the  */
+/* dark.                                                             */
+header {
+    background-color: var(--color-header-bg);
+    max-width: 100%;
+    margin-bottom: var(--spacing);
+}
+
+header h1 {
+    color: var(--color-panel-text);
+}
+
+header h1,
+.nav-row {
+    max-width: var(--max-width);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+/* ------------------------------------------------------------------ */
+/* Breadcrumbs (inside the blue header panel)                         */
+/* ------------------------------------------------------------------ */
+.breadcrumbs {
+    font-size: 0.9rem;
+    color: var(--color-panel-text);
+    opacity: 0.7;
+}
+
+.breadcrumbs a {
+    color: var(--color-panel-text);
+    text-decoration: none;
+    opacity: 0.85;
+}
+
+.breadcrumbs a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+/* ------------------------------------------------------------------ */
+/* Directory listing                                                  */
+/* ------------------------------------------------------------------ */
+.directory {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.directory .link {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* Filled-square prefix — evokes panel indicator lights */
+.directory .link::before {
+    content: "\25AA";
+    color: var(--color-accent);
+    font-size: 0.7em;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}
+
+.directory .link a {
+    color: var(--color-link);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.directory .link a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+}
+
+.description {
+    display: inline;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+}
+
+.aliases {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: 0.8125rem;
+    font-style: italic;
+    margin-top: 0.125rem;
+}
+
+/* Indent link aliases to align under the link text */
+.directory .link .aliases {
+    padding-left: 1.1rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Categories — cream panel with cobalt blue label strip              */
+/* ------------------------------------------------------------------ */
+.category {
+    margin-bottom: calc(var(--spacing) * 1.25);
+    padding: var(--spacing);
+    background-color: var(--color-category-bg);
+    border: 1px solid var(--color-border);
+}
+
+/* Category title bar — cobalt blue label strip across the panel,    */
+/* like the "ECLIPSE SYSTEM" nameplate on the cabinet door.          */
+.category summary {
+    margin: calc(-1 * var(--spacing)) calc(-1 * var(--spacing)) 0.75rem;
+    padding: 0.4rem var(--spacing);
+    background-color: var(--color-accent);
+    border-bottom: 1px solid var(--color-border);
+    cursor: pointer;
+    list-style: none;
+    color: var(--color-panel-text);
+}
+
+.category summary::-webkit-details-marker {
+    display: none;
+}
+
+.category summary::before {
+    content: "\25BC";
+    display: inline-block;
+    margin-right: 0.5rem;
+    font-size: 0.7em;
+    transition: transform 0.15s ease;
+    color: var(--color-panel-text);
+    opacity: 0.7;
+}
+
+.category details:not([open]) summary::before {
+    transform: rotate(-90deg);
+}
+
+.category details:not([open]) summary {
+    margin-bottom: calc(-1 * var(--spacing));
+    border-bottom: none;
+}
+
+.category h2 {
+    display: inline;
+    margin: 0;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-panel-text);
+}
+
+.category-link {
+    font-size: 0.75em;
+    font-weight: normal;
+    margin-left: 0.3rem;
+    color: var(--color-panel-text);
+    text-decoration: none;
+    opacity: 0.7;
+}
+
+.category-link:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+.category-description {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    margin: 0 0 0.5rem;
+}
+
+.category ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Category navigation (inside the blue header panel)                 */
+/* ------------------------------------------------------------------ */
+.category-nav {
+    font-size: 0.85rem;
+}
+
+.category-nav a {
+    color: var(--color-panel-text);
+    text-decoration: none;
+    opacity: 0.85;
+}
+
+.category-nav a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+/* ------------------------------------------------------------------ */
+/* Back to top                                                        */
+/* ------------------------------------------------------------------ */
+.back-to-top {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    text-align: right;
+}
+
+.back-to-top a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+}
+
+.back-to-top a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+}
+
+/* ------------------------------------------------------------------ */
+/* Footer — clean controls with blue accent rule                     */
+/* ------------------------------------------------------------------ */
+footer {
+    margin-top: calc(var(--spacing) * 2);
+    padding-top: var(--spacing);
+    border-top: 3px solid var(--color-accent);
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.controls label {
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.8rem;
+}
+
+.controls select,
+.controls button {
+    font-family: var(--font-family);
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    cursor: pointer;
+}
+
+.controls select:focus,
+.controls button:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+}
+
+.controls button:hover {
+    background-color: var(--color-accent);
+    color: var(--color-panel-text);
+    border-color: var(--color-accent);
+}
+
+.version-info {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.version-info a {
+    color: var(--color-link);
+    text-decoration: none;
+}
+
+.version-info a:hover {
+    text-decoration: underline;
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive                                                         */
+/* ------------------------------------------------------------------ */
+@media (max-width: 640px) {
+    h1 {
+        font-size: 1.25rem;
+    }
+
+    .category {
+        padding: 0.75rem;
+    }
+
+    .controls {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+}

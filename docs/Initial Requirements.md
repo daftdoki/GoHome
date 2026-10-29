@@ -225,12 +225,13 @@ The `description` key is always optional.
 The directory yaml is a list called `directory` that contains entries for
 either a category when the `entries` key is present, or a link when the
 `url` key is present. If both `entries` and `url` are present, `url` is
-ignored and the entry is assumed to be a category. The `entries` key
-contains a list of links for the category. Only one level of category is
-supported and any categories defined inside of a category are ignored.
-All entries inside a nested category (including regular links) are also
-discarded. The service logs a warning at startup identifying any nested
-categories that were skipped, including a count of discarded entries.
+ignored, the entry is assumed to be a category, and the service logs a
+warning naming the entry. The `entries` key contains a list of links for
+the category. A link `url` must be an `http` or `https` URL with a host;
+anything else is a configuration error. Only one level of category is
+supported. A category defined inside a category is a configuration error:
+the service logs an error naming the nested category and its parent, then
+exits.
 
 ### config.yml
 
@@ -419,10 +420,12 @@ target is exactly the configured URL.
 Link and category names are normalized to URL-safe slugs using the following
 rules:
 
+- Apply Unicode NFKD normalization and drop combining marks, so accented
+  letters fold to their base letter (`Café` becomes `cafe`)
 - Convert to lowercase
 - Replace spaces with hyphens (`-`)
 - Strip all characters that are not ASCII letters, ASCII digits, or hyphens
-  (non-ASCII characters like accented letters are removed)
+  (characters with no ASCII form, such as CJK, are removed)
 - Collapse consecutive hyphens into a single hyphen
 
 For example: `My Cool Link!` becomes `my-cool-link`. Name uniqueness is

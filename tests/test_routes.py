@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import pytest
+
 from gohome import create_app
 
 if TYPE_CHECKING:
@@ -198,3 +200,27 @@ class TestUnknownPaths:
         response = client.get("/streaming/netflix")
         assert response.status_code == 302
         assert response.headers["Location"] == "/"
+
+
+class TestAccentFolding:
+    """Request paths fold accents the same way slugs do."""
+
+    @pytest.fixture
+    def accent_client(self, tmp_path: Path) -> FlaskClient:
+        """Build a client for a directory with an accented link name."""
+        (tmp_path / "directory.yml").write_text(
+            "directory:\n  - name: Café\n    url: https://cafe.example.com\n",
+            encoding="utf-8",
+        )
+        app = create_app(str(tmp_path))
+        app.config["TESTING"] = True
+        return app.test_client()
+
+    @pytest.mark.parametrize("path", ["/café", "/cafe", "/Café"])
+    def test_accented_and_plain_paths_resolve(
+        self, accent_client: FlaskClient, path: str
+    ) -> None:
+        """Both the accented and plain forms redirect to the link."""
+        response = accent_client.get(path)
+        assert response.status_code == 302
+        assert response.headers["Location"] == "https://cafe.example.com"

@@ -20,6 +20,8 @@ from gohome.models import AppConfig, CategoryEntry, Directory
 from gohome.routes import register_routes
 from gohome.themes import BUNDLED_THEMES, discover_themes
 
+logger = logging.getLogger(__name__)
+
 
 def create_app(config_dir: str = ".") -> Flask:
     """Build and configure the GoHome Flask application.
@@ -36,13 +38,23 @@ def create_app(config_dir: str = ".") -> Flask:
     Returns:
         A fully configured Flask application ready to serve requests.
     """
+    # Configure the handler before loading so config warnings and errors
+    # use the final format; the configured level is applied afterwards.
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
     app_config: AppConfig = load_app_config(config_dir)
     directory: Directory = load_directory(config_dir)
     themes: list[str] = discover_themes(config_dir)
 
-    # Configure logging
-    log_level = getattr(logging, app_config.log_level.upper(), logging.INFO)
-    logging.basicConfig(level=log_level, format="%(levelname)s: %(message)s")
+    # Apply the configured log level now that AppConfig is known
+    known_levels = logging.getLevelNamesMapping()
+    log_level = known_levels.get(app_config.log_level.upper())
+    if log_level is None:
+        logger.warning(
+            "Invalid log_level %r; falling back to INFO", app_config.log_level
+        )
+        log_level = logging.INFO
+    logging.getLogger().setLevel(log_level)
 
     app = Flask(__name__)
 

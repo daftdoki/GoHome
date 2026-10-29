@@ -6,6 +6,7 @@ set of rules so that ``go/My Cool Link`` resolves to the same entry as
 """
 
 import re
+import unicodedata
 
 _NON_ALNUM_HYPHEN: re.Pattern[str] = re.compile(r"[^a-z0-9-]")
 _MULTI_HYPHEN: re.Pattern[str] = re.compile(r"-{2,}")
@@ -16,11 +17,14 @@ def normalize_name(name: str) -> str:
 
     The normalization rules are applied in order:
 
-    1. Convert to lowercase.
-    2. Replace spaces with hyphens.
-    3. Strip all characters that are not ASCII letters, digits, or hyphens.
-    4. Collapse consecutive hyphens into a single hyphen.
-    5. Strip leading and trailing hyphens.
+    1. Apply Unicode NFKD normalization and drop combining marks, so
+       accented letters fold to their base letter (``"Café"`` becomes
+       ``"Cafe"``).
+    2. Convert to lowercase.
+    3. Replace spaces with hyphens.
+    4. Strip all characters that are not ASCII letters, digits, or hyphens.
+    5. Collapse consecutive hyphens into a single hyphen.
+    6. Strip leading and trailing hyphens.
 
     Args:
         name: The human-readable entry name (e.g. ``"My Cool Link!"``).
@@ -29,7 +33,8 @@ def normalize_name(name: str) -> str:
         The normalized slug (e.g. ``"my-cool-link"``).  May be empty if
         the name contains no ASCII alphanumeric characters.
     """
-    slug = name.lower()
+    decomposed = unicodedata.normalize("NFKD", name)
+    slug = "".join(c for c in decomposed if not unicodedata.combining(c)).lower()
     slug = slug.replace(" ", "-")
     slug = _NON_ALNUM_HYPHEN.sub("", slug)
     slug = _MULTI_HYPHEN.sub("-", slug)

@@ -133,6 +133,18 @@ uv run python scripts/generate_screenshots.py
   Custom themes cannot shadow bundled theme names.
 - **Adding a bundled theme**: copy the CSS to `src/gohome/static/` and
   add the name to `BUNDLED_THEMES` in `themes.py`
+- **Link URLs**: `_process_entry` requires link `url` values to be
+  `http`/`https` with a host (scheme compared case-insensitively);
+  anything else exits at startup.
+- **Nested categories**: A category inside a category logs an error naming
+  both and exits. An entry with both `url` and `entries` logs a warning and
+  stays a category.
+- **Slug normalization**: `normalize_name` folds accents to ASCII (NFKD,
+  combining marks dropped) before the other rules. Request paths use the
+  same function.
+- **Logging**: `create_app` calls `logging.basicConfig` at INFO before
+  loading config, then sets the root level from `log_level`. An invalid
+  level logs a warning and falls back to INFO.
 - **Cookies**: Server reads but never sets cookies; JS handles writes
 
 ## Coding Conventions

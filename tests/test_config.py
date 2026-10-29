@@ -353,6 +353,10 @@ class TestLoadDirectoryErrors:
             "http:///path",
             "123",
             "[1, 2]",
+            '"https://a.example.com\\n"',
+            '" https://a.example.com"',
+            '"https://a.exa\\nmple.com"',
+            '"https://a.example.com/\\tx"',
         ],
     )
     def test_invalid_link_url_exits(

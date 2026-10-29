@@ -265,7 +265,9 @@ then visit `go/` from any device on your tailnet. Try `go/google`
 If something is not working, see [Troubleshooting](#troubleshooting).
 
 The image has a built-in healthcheck that requests `/` on
-`GOHOME_PORT` every 30 seconds. `docker compose ps` shows
+`127.0.0.1:GOHOME_PORT` every 30 seconds, and every 2 seconds just after
+start. It needs `GOHOME_HOST` to be `0.0.0.0` or `127.0.0.1`, which both
+Compose files already use. `docker compose ps` shows
 `(healthy)` or `(unhealthy)` next to the GoHome container. To see the
 last few check results:
 
@@ -385,7 +387,8 @@ a query, the two are joined with `&`.
 
 If a path matches no link or category, GoHome sends you to the
 directory page with a notice above the list, such as `No link named
-"netflx"`. Paths with more than one segment (`go/a/b`) go to the
+"netflx"`. The notice shows the path as a slug, so `go/Net Flx` reports
+`net-flx`. Paths with more than one segment (`go/a/b`) go to the
 directory page without a notice.
 
 ### Category Pages
@@ -473,7 +476,9 @@ both resolve.
 
 Slugs that used to drop accented letters now keep their base letter:
 `Café` was `caf` and is now `cafe`. Check bookmarks and aliases that
-relied on the old slugs.
+relied on the old slugs. Two names that used to be distinct can now
+collide, such as `Café` and `Cafe`. GoHome refuses to start on a
+collision, so rename one of them before upgrading.
 
 Because slugs must be unique, two entries whose names normalize to the
 same slug (e.g., "My Link" and "my-link") cause a validation error at
@@ -517,6 +522,11 @@ port: 8080                  # Bind port
 log_level: "info"           # debug, info, warning, error
 default_theme: "default"    # Theme for first-time visitors
 ```
+
+At `info`, GoHome logs one line per request with the method, path,
+status, and redirect target, for example
+`INFO: GET /google?q=1 302 -> https://google.com?q=1`. Set `log_level`
+to `warning` to turn these off.
 
 You can also download the sample file:
 

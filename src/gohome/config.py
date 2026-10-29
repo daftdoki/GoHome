@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import sys
 from pathlib import Path
 from types import MappingProxyType
@@ -34,6 +35,9 @@ _ENV_VAR_MAP: dict[str, str] = {
 """Mapping from ``config.yml`` keys to their environment variable overrides."""
 
 _KNOWN_CONFIG_KEYS: frozenset[str] = frozenset(_ENV_VAR_MAP)
+
+_CONTROL_CHARS: re.Pattern[str] = re.compile(r"[\x00-\x1f\x7f]")
+"""Matches ASCII control characters, including tab, CR and LF."""
 
 
 def load_app_config(config_dir: str) -> AppConfig:
@@ -205,9 +209,14 @@ def _is_http_url(value: Any) -> bool:
 
     Returns:
         ``True`` if *value* is a string with an ``http``/``https`` scheme
-        (compared case-insensitively) and a non-empty host.
+        (compared case-insensitively) and a non-empty host, and has no
+        leading or trailing whitespace and no control characters.
+        ``urlsplit`` silently drops tabs and newlines, so they are
+        rejected first; otherwise they would reach the redirect header.
     """
     if not isinstance(value, str):
+        return False
+    if value != value.strip() or _CONTROL_CHARS.search(value):
         return False
     try:
         parts = urlsplit(value)

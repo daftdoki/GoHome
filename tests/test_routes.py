@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 import pytest
@@ -137,6 +138,12 @@ class TestQueryPassthrough:
         )
         assert response.headers["Location"] == "https://kagi.com?q=caf%C3%A9"
 
+    def test_raw_hash_in_query_encoded(self, tmp_path: Path) -> None:
+        """A raw ``#`` in the query is escaped so the target fragment survives."""
+        client = _client_for(tmp_path, _QUERY_DIRECTORY_YML)
+        response = client.get("/fragment", environ_overrides={"QUERY_STRING": "q=a#b"})
+        assert response.headers["Location"] == "https://x.test/page?q=a%23b#sec"
+
     def test_existing_query_joined_with_ampersand(self, tmp_path: Path) -> None:
         """A target that already has a query gets ``&`` plus the new one."""
         response = _client_for(tmp_path, _QUERY_DIRECTORY_YML).get("/existing?q=hello")
@@ -267,11 +274,25 @@ class TestNotFoundNotice:
         html = client.get("/?notfound=").get_data(as_text=True)
         assert 'class="notfound"' not in html
 
-    def test_notice_escapes_html(self, client: FlaskClient) -> None:
-        """HTML in the value is escaped."""
+    def test_notice_shows_normalized_slug(self, client: FlaskClient) -> None:
+        """The notice shows the slug, so HTML and prose cannot be injected."""
         html = client.get("/?notfound=<script>alert(1)</script>").get_data(as_text=True)
-        assert "<script>alert(1)</script>" not in html
-        assert "&lt;script&gt;alert(1)&lt;/script&gt;" in html
+        assert "<script>alert" not in html
+        assert "&lt;script" not in html
+        assert 'No link named "scriptalert1script"' in html
+
+    def test_notice_rejects_spoofed_text(self, client: FlaskClient) -> None:
+        """Crafted prose is reduced to a slug instead of shown as written."""
+        html = client.get("/?notfound=Links moved, sign in at evil.example").get_data(
+            as_text=True
+        )
+        assert "sign in at" not in html
+        assert 'No link named "links-moved-sign-in-at-evilexample"' in html
+
+    def test_notice_absent_when_slug_empty(self, client: FlaskClient) -> None:
+        """A value with no slug characters renders no notice."""
+        html = client.get("/?notfound=!!!").get_data(as_text=True)
+        assert 'class="notfound"' not in html
 
     def test_notice_truncated(self, client: FlaskClient) -> None:
         """Values longer than 100 characters are cut to 100."""
@@ -283,3 +304,23 @@ class TestNotFoundNotice:
         """Following an unknown-path redirect shows the notice."""
         response = client.get("/nonexistent", follow_redirects=True)
         assert 'No link named "nonexistent"' in response.get_data(as_text=True)
+
+
+class TestAccessLog:
+    """Verify each request is logged, since waitress has no access log."""
+
+    def test_redirect_logged(
+        self, client: FlaskClient, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """A link redirect logs the method, path, status and target."""
+        with caplog.at_level(logging.INFO, logger="gohome.routes"):
+            client.get("/google?q=1")
+        assert "GET /google?q=1 302 -> https://google.com?q=1" in caplog.text
+
+    def test_page_logged(
+        self, client: FlaskClient, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """A page request logs the method, path and status."""
+        with caplog.at_level(logging.INFO, logger="gohome.routes"):
+            client.get("/")
+        assert "GET / 200" in caplog.text

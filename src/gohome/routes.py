@@ -7,6 +7,7 @@ pages, the favicon, custom theme CSS serving, and a
 
 from __future__ import annotations
 
+import logging
 import string
 from pathlib import Path
 from urllib.parse import quote, quote_from_bytes, urlsplit, urlunsplit
@@ -20,14 +21,20 @@ from gohome.themes import resolve_theme
 
 _NOTFOUND_MAX_LENGTH = 100
 
+_QUERY_SAFE: str = string.punctuation.replace("#", "")
+"""Query bytes passed through unencoded: ASCII punctuation except ``#``."""
+
+logger = logging.getLogger(__name__)
+
 
 def _append_query(url: str, query: bytes) -> str:
     """Append a raw query string to *url*, ahead of any fragment.
 
-    ASCII letters, digits and punctuation pass through unchanged, so
-    existing percent-escapes and ``+`` stay exactly as the client sent
-    them.  Spaces, control bytes and non-ASCII bytes (such as raw UTF-8)
-    are percent-encoded once.  If *url* already has a query, the new one
+    ASCII letters, digits and punctuation other than ``#`` pass through
+    unchanged, so existing percent-escapes and ``+`` stay exactly as the
+    client sent them.  ``#``, spaces, control bytes and non-ASCII bytes
+    (such as raw UTF-8) are percent-encoded once, so they cannot end the
+    query early or corrupt the target's fragment.  If *url* already has a query, the new one
     is joined with ``&``.
 
     Args:
@@ -41,7 +48,7 @@ def _append_query(url: str, query: bytes) -> str:
     if not query:
         return url
     parts = urlsplit(url)
-    extra = quote_from_bytes(query, safe=string.punctuation)
+    extra = quote_from_bytes(query, safe=_QUERY_SAFE)
     combined = f"{parts.query}&{extra}" if parts.query else extra
     return urlunsplit(parts._replace(query=combined))
 
@@ -52,6 +59,24 @@ def register_routes(app: Flask) -> None:
     Args:
         app: The Flask application to attach routes to.
     """
+
+    @app.after_request
+    def _log_request(response: Response) -> Response:
+        """Log one INFO line per request, since waitress has no access log.
+
+        The line holds the method, path with query, status code and, for
+        redirects, the ``Location`` target.
+        """
+        location = response.headers.get("Location")
+        target = f" -> {location}" if location else ""
+        logger.info(
+            "%s %s %d%s",
+            request.method,
+            request.full_path.rstrip("?"),
+            response.status_code,
+            target,
+        )
+        return response
 
     @app.after_request
     def _add_cache_control(response: Response) -> Response:
@@ -70,9 +95,11 @@ def register_routes(app: Flask) -> None:
     def root() -> str:
         """Render the full link directory page.
 
-        A non-empty ``notfound`` query parameter (set by the redirect for
-        unknown paths) adds a notice naming the missing link, truncated to
-        ``_NOTFOUND_MAX_LENGTH`` characters.
+        A ``notfound`` query parameter (set by the redirect for unknown
+        paths) adds a notice naming the missing link.  The value is shown
+        as its normalized slug, truncated to ``_NOTFOUND_MAX_LENGTH``
+        characters, so a crafted link cannot put arbitrary text on the
+        page.  No notice is shown when the slug is empty.
         """
         app_config: AppConfig = app.config["GOHOME_APP_CONFIG"]
         directory: Directory = app.config["GOHOME_DIRECTORY"]
@@ -88,7 +115,9 @@ def register_routes(app: Flask) -> None:
             page_description=None,
             items=directory.items,
             breadcrumbs=[("Home", None)],
-            notfound=request.args.get("notfound", "")[:_NOTFOUND_MAX_LENGTH],
+            notfound=normalize_name(request.args.get("notfound", ""))[
+                :_NOTFOUND_MAX_LENGTH
+            ],
             themes=themes,
             active_theme=active_theme,
             active_mode=active_mode,

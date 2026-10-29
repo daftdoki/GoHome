@@ -310,8 +310,9 @@ using the same rules as entry names, so `go/Netflix`, `go/NETFLIX`,
 and `go/netflix` all resolve to the same entry.
 
 Only flat, single-segment paths are supported. Nested paths like
-`go/streaming/netflix` are not valid and are treated the same as any
-unknown path. There is no hierarchical path routing.
+`go/streaming/netflix` are not valid. They redirect to the root
+directory page with no not-found notice. There is no hierarchical path
+routing.
 
 If any two entries (whether links, categories, or a mix) normalize to the
 same slug, this is treated as a configuration error. The service logs an
@@ -322,8 +323,11 @@ If a user visits a path that does not match any known link or category
 name, the service responds with an HTTP 302 redirect to the root
 directory page. For a single-segment path the redirect target is
 `/?notfound=<path>` (URL-encoded). When the root page receives a
-non-empty `notfound` parameter, it shows a notice above the directory
-(`No link named "<value>"`, auto-escaped and cut to 100 characters).
+`notfound` parameter, it normalizes the value to a slug, cuts it to 100
+characters, and shows a notice above the directory
+(`No link named "<slug>"`). Showing the slug instead of the raw value
+means a crafted link can't display arbitrary text. If the slug is empty,
+no notice is shown.
 Multi-segment paths redirect to plain `/` with no notice. The server
 sets no cookies and keeps no session state for this.
 
@@ -343,7 +347,10 @@ mapping is handled entirely by docker-compose.
 
 The image defines a `HEALTHCHECK` that requests `/` on `127.0.0.1` at
 `GOHOME_PORT` using python's `urllib` (the slim image has no curl or
-wget). Docker reports the result in `docker compose ps` and
+wget). It probes every 2 seconds during a 10-second start period, then
+every 30 seconds. Because it targets `127.0.0.1`, `GOHOME_HOST` must be
+`0.0.0.0` or `127.0.0.1` inside the container. Docker reports the result
+in `docker compose ps` and
 `docker inspect`, and the deploy hook uses
 `docker compose up -d --wait` to block until the container is healthy.
 

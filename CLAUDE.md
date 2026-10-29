@@ -148,14 +148,19 @@ uv run python scripts/generate_screenshots.py
   warning.
 - **Unknown paths**: A single-segment path that matches nothing redirects
   (302) to `/?notfound=<urlencoded path>`; the root page shows a
-  `p.notfound[role=status]` notice (value capped at 100 characters,
-  escaped by Jinja). Multi-segment paths redirect to plain `/`. This
+  `p.notfound[role=status]` notice. The root route shows the value
+  passed through `normalize_name` and capped at 100 characters, so a
+  crafted link can't put prose on the page. An empty slug shows no
+  notice. Multi-segment paths redirect to plain `/`. This
   replaces flash messages because the server has no session or secret key.
 - **Anchors**: The body anchor is `id="gohome-top"` so it cannot collide
   with a category `id` (the category slug, e.g. a category named "Top").
   Category ids stay as bare slugs because users bookmark `#slug`.
 - **Favicon**: `/favicon.ico` is an explicit route serving
   `static/favicon.ico`; without it the catch-all would redirect.
+- **Request log**: waitress writes no access log, so an `after_request`
+  hook in `routes.py` logs one INFO line per request (method, path,
+  status, and redirect target).
 - **Cookies**: Server reads but never sets cookies; JS handles writes
 
 ## Coding Conventions

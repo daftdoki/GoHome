@@ -33,8 +33,13 @@ EXPOSE 8080
 # --interval=30s   one request every 30s is cheap for this app
 # --timeout=5s     the app answers in milliseconds; 5s means it is hung
 # --start-period=10s  startup failures in this window do not count
+# --start-interval=2s  probe every 2s during the start period, so the
+#                      container turns healthy within seconds of starting
 # --retries=3      three straight failures (about 90s) mark it unhealthy
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+# The probe always targets 127.0.0.1, so GOHOME_HOST must be 0.0.0.0 or
+# 127.0.0.1 inside the container.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
+    --start-interval=2s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:${GOHOME_PORT}/', timeout=4)"
 
 # Call the venv interpreter directly so uv does not re-sync at startup.

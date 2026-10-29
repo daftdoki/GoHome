@@ -335,6 +335,12 @@ sets `GOHOME_HOST=0.0.0.0` and `GOHOME_PORT=8080` so that the container
 binds correctly regardless of what `config.yml` contains. External port
 mapping is handled entirely by docker-compose.
 
+The image defines a `HEALTHCHECK` that requests `/` on `127.0.0.1` at
+`GOHOME_PORT` using python's `urllib` (the slim image has no curl or
+wget). Docker reports the result in `docker compose ps` and
+`docker inspect`, and the deploy hook uses
+`docker compose up -d --wait` to block until the container is healthy.
+
 A single bind mount directory is mapped into the container containing all
 user-provided files:
 

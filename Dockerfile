@@ -27,5 +27,15 @@ USER gohome
 
 EXPOSE 8080
 
+# Healthcheck: the slim image has no curl or wget, so use python's urllib.
+# Shell form so ${GOHOME_PORT} expands at run time. urlopen raises on
+# connection errors, timeouts, and non-2xx responses, so python exits 1.
+# --interval=30s   one request every 30s is cheap for this app
+# --timeout=5s     the app answers in milliseconds; 5s means it is hung
+# --start-period=10s  startup failures in this window do not count
+# --retries=3      three straight failures (about 90s) mark it unhealthy
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:${GOHOME_PORT}/', timeout=4)"
+
 # Call the venv interpreter directly so uv does not re-sync at startup.
 CMD ["/app/.venv/bin/python", "-m", "gohome", "/config"]

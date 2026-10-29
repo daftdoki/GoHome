@@ -264,6 +264,15 @@ then visit `go/` from any device on your tailnet. Try `go/google`
 
 If something is not working, see [Troubleshooting](#troubleshooting).
 
+The image has a built-in healthcheck that requests `/` on
+`GOHOME_PORT` every 30 seconds. `docker compose ps` shows
+`(healthy)` or `(unhealthy)` next to the GoHome container. To see the
+last few check results:
+
+```bash
+docker inspect --format '{{json .State.Health}}' <container>
+```
+
 ### Updating
 
 Pull the latest image and restart:
@@ -549,7 +558,9 @@ steps.
 
 ### GoHome is not reachable
 
-Verify both containers are running (`docker compose ps`), check
+Verify both containers are running (`docker compose ps`; the GoHome
+container should show `healthy`). To see why a check failed, run
+`docker inspect --format '{{json .State.Health}}' <container>`. Check
 GoHome logs (`docker compose logs gohome`), and ensure
 `network_mode: service:tailscale` is set in the Compose file.
 

@@ -7,8 +7,9 @@ pages, the favicon, custom theme CSS serving, and a
 
 from __future__ import annotations
 
+import string
 from pathlib import Path
-from urllib.parse import quote, urlsplit, urlunsplit
+from urllib.parse import quote, quote_from_bytes, urlsplit, urlunsplit
 
 import werkzeug
 from flask import Flask, Response, abort, redirect, render_template, request
@@ -20,12 +21,14 @@ from gohome.themes import resolve_theme
 _NOTFOUND_MAX_LENGTH = 100
 
 
-def append_query(url: str, query: bytes) -> str:
+def _append_query(url: str, query: bytes) -> str:
     """Append a raw query string to *url*, ahead of any fragment.
 
-    The query bytes are decoded as Latin-1 so they round-trip unchanged,
-    keeping percent-encoding and ``+`` exactly as the client sent them.
-    If *url* already has a query, the new one is joined with ``&``.
+    ASCII letters, digits and punctuation pass through unchanged, so
+    existing percent-escapes and ``+`` stay exactly as the client sent
+    them.  Spaces, control bytes and non-ASCII bytes (such as raw UTF-8)
+    are percent-encoded once.  If *url* already has a query, the new one
+    is joined with ``&``.
 
     Args:
         url: The configured target URL.
@@ -38,7 +41,7 @@ def append_query(url: str, query: bytes) -> str:
     if not query:
         return url
     parts = urlsplit(url)
-    extra = query.decode("latin-1")
+    extra = quote_from_bytes(query, safe=string.punctuation)
     combined = f"{parts.query}&{extra}" if parts.query else extra
     return urlunsplit(parts._replace(query=combined))
 
@@ -124,7 +127,7 @@ def register_routes(app: Flask) -> None:
             return redirect(f"/?notfound={quote(path, safe='')}", code=302)
 
         if isinstance(item, LinkEntry):
-            return redirect(append_query(item.url, request.query_string), code=302)
+            return redirect(_append_query(item.url, request.query_string), code=302)
 
         # CategoryEntry — render the category page
         bundled_themes: frozenset[str] = app.config["GOHOME_BUNDLED_THEMES"]

@@ -93,6 +93,14 @@ def load_app_config(config_dir: str) -> AppConfig:
             logger.error("Invalid port value: %r", kwargs["port"])
             sys.exit(1)
 
+    # Log level must name a standard logging level
+    if "log_level" in kwargs:
+        level_name = str(kwargs["log_level"])
+        if level_name.upper() not in logging.getLevelNamesMapping():
+            logger.warning("Invalid log_level %r; falling back to INFO", level_name)
+            level_name = "info"
+        kwargs["log_level"] = level_name
+
     return AppConfig(config_dir=str(Path(config_dir).resolve()), **kwargs)
 
 
@@ -206,7 +214,7 @@ def _is_http_url(value: Any) -> bool:
         host = parts.hostname
     except ValueError:
         return False
-    return parts.scheme.lower() in ("http", "https") and bool(host)
+    return parts.scheme in ("http", "https") and bool(host)
 
 
 def _process_entry(

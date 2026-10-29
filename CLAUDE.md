@@ -143,8 +143,9 @@ uv run python scripts/generate_screenshots.py
   combining marks dropped) before the other rules. Request paths use the
   same function.
 - **Logging**: `create_app` calls `logging.basicConfig` at INFO before
-  loading config, then sets the root level from `log_level`. An invalid
-  level logs a warning and falls back to INFO.
+  loading config, then sets the root level from `log_level`.
+  `load_app_config` replaces an invalid level with `info` and logs a
+  warning.
 - **Unknown paths**: A single-segment path that matches nothing redirects
   (302) to `/?notfound=<urlencoded path>`; the root page shows a
   `p.notfound[role=status]` notice (value capped at 100 characters,

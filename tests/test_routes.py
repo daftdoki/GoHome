@@ -26,9 +26,9 @@ directory:
 """
 
 
-def _query_client(tmp_path: Path) -> FlaskClient:
-    """Build a test client for links with pre-existing queries and fragments."""
-    (tmp_path / "directory.yml").write_text(_QUERY_DIRECTORY_YML, encoding="utf-8")
+def _client_for(tmp_path: Path, directory_yml: str) -> FlaskClient:
+    """Build a test client for an app loaded from *directory_yml*."""
+    (tmp_path / "directory.yml").write_text(directory_yml, encoding="utf-8")
     application = create_app(str(tmp_path))
     application.config["TESTING"] = True
     return application.test_client()
@@ -128,19 +128,28 @@ class TestQueryPassthrough:
             "https://kagi.com?q=a%20b+c%2Fd&x=%E2%9C%93"
         )
 
+    def test_raw_non_ascii_bytes_percent_encoded_once(
+        self, client: FlaskClient
+    ) -> None:
+        """Raw UTF-8 query bytes become single percent-escapes."""
+        response = client.get(
+            "/kagi", environ_overrides={"QUERY_STRING": "q=caf\xc3\xa9"}
+        )
+        assert response.headers["Location"] == "https://kagi.com?q=caf%C3%A9"
+
     def test_existing_query_joined_with_ampersand(self, tmp_path: Path) -> None:
         """A target that already has a query gets ``&`` plus the new one."""
-        response = _query_client(tmp_path).get("/existing?q=hello")
+        response = _client_for(tmp_path, _QUERY_DIRECTORY_YML).get("/existing?q=hello")
         assert response.headers["Location"] == "https://x.test/?a=1&q=hello"
 
     def test_query_goes_before_fragment(self, tmp_path: Path) -> None:
         """The query is inserted ahead of the target's fragment."""
-        response = _query_client(tmp_path).get("/fragment?q=hello")
+        response = _client_for(tmp_path, _QUERY_DIRECTORY_YML).get("/fragment?q=hello")
         assert response.headers["Location"] == "https://x.test/page?q=hello#sec"
 
     def test_existing_query_and_fragment(self, tmp_path: Path) -> None:
         """A target with both gets the query joined and the fragment kept last."""
-        response = _query_client(tmp_path).get("/both?q=hello")
+        response = _client_for(tmp_path, _QUERY_DIRECTORY_YML).get("/both?q=hello")
         assert response.headers["Location"] == "https://x.test/page?a=1&q=hello#sec"
 
     def test_category_page_ignores_query(self, client: FlaskClient) -> None:
@@ -212,13 +221,9 @@ class TestAccentFolding:
     @pytest.fixture
     def accent_client(self, tmp_path: Path) -> FlaskClient:
         """Build a client for a directory with an accented link name."""
-        (tmp_path / "directory.yml").write_text(
-            "directory:\n  - name: Café\n    url: https://cafe.example.com\n",
-            encoding="utf-8",
+        return _client_for(
+            tmp_path, "directory:\n  - name: Café\n    url: https://cafe.example.com\n"
         )
-        app = create_app(str(tmp_path))
-        app.config["TESTING"] = True
-        return app.test_client()
 
     @pytest.mark.parametrize("path", ["/café", "/cafe", "/Café"])
     def test_accented_and_plain_paths_resolve(

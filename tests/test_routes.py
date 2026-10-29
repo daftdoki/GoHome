@@ -148,13 +148,11 @@ class TestQueryPassthrough:
         response = client.get("/streaming?q=hello")
         assert response.status_code == 200
 
-    def test_unknown_slug_redirects_to_root_without_query(
-        self, client: FlaskClient
-    ) -> None:
-        """Unknown slugs still redirect to ``/`` and drop the query."""
+    def test_unknown_slug_drops_query(self, client: FlaskClient) -> None:
+        """Unknown slugs redirect to the not-found notice and drop the query."""
         response = client.get("/nope?q=hello")
         assert response.status_code == 302
-        assert response.headers["Location"] == "/"
+        assert response.headers["Location"] == "/?notfound=nope"
 
 
 class TestCategoryPage:
@@ -190,10 +188,16 @@ class TestUnknownPaths:
     """Verify handling of unknown and multi-segment paths."""
 
     def test_unknown_path_redirects(self, client: FlaskClient) -> None:
-        """An unknown path redirects to the root."""
+        """An unknown single-segment path redirects with a notfound hint."""
         response = client.get("/nonexistent")
         assert response.status_code == 302
-        assert response.headers["Location"] == "/"
+        assert response.headers["Location"] == "/?notfound=nonexistent"
+
+    def test_unknown_path_is_url_encoded(self, client: FlaskClient) -> None:
+        """Special characters in the requested path are percent-encoded."""
+        response = client.get("/a%20b%26c%3Cd")
+        assert response.status_code == 302
+        assert response.headers["Location"] == "/?notfound=a%20b%26c%3Cd"
 
     def test_multi_segment_redirects(self, client: FlaskClient) -> None:
         """Multi-segment paths redirect to the root."""
@@ -224,3 +228,53 @@ class TestAccentFolding:
         response = accent_client.get(path)
         assert response.status_code == 302
         assert response.headers["Location"] == "https://cafe.example.com"
+
+
+class TestFavicon:
+    """Verify /favicon.ico serves the bundled icon."""
+
+    def test_favicon_served(self, client: FlaskClient) -> None:
+        """/favicon.ico returns the icon, not a redirect."""
+        response = client.get("/favicon.ico")
+        assert response.status_code == 200
+        assert response.mimetype in ("image/x-icon", "image/vnd.microsoft.icon")
+        assert response.get_data()[:4] == b"\x00\x00\x01\x00"
+        response.close()
+
+
+class TestNotFoundNotice:
+    """Verify the notfound notice on the root page."""
+
+    def test_notice_shown(self, client: FlaskClient) -> None:
+        """A notfound value renders a status notice naming the link."""
+        html = client.get("/?notfound=foo").get_data(as_text=True)
+        assert 'class="notfound"' in html
+        assert 'role="status"' in html
+        assert 'No link named "foo"' in html
+
+    def test_notice_absent_by_default(self, client: FlaskClient) -> None:
+        """The notice is not rendered without the parameter."""
+        html = client.get("/").get_data(as_text=True)
+        assert "notfound" not in html
+
+    def test_notice_absent_when_empty(self, client: FlaskClient) -> None:
+        """An empty notfound value renders no notice."""
+        html = client.get("/?notfound=").get_data(as_text=True)
+        assert 'class="notfound"' not in html
+
+    def test_notice_escapes_html(self, client: FlaskClient) -> None:
+        """HTML in the value is escaped."""
+        html = client.get("/?notfound=<script>alert(1)</script>").get_data(as_text=True)
+        assert "<script>alert(1)</script>" not in html
+        assert "&lt;script&gt;alert(1)&lt;/script&gt;" in html
+
+    def test_notice_truncated(self, client: FlaskClient) -> None:
+        """Values longer than 100 characters are cut to 100."""
+        html = client.get("/?notfound=" + "x" * 300).get_data(as_text=True)
+        assert "x" * 100 in html
+        assert "x" * 101 not in html
+
+    def test_redirect_then_notice(self, client: FlaskClient) -> None:
+        """Following an unknown-path redirect shows the notice."""
+        response = client.get("/nonexistent", follow_redirects=True)
+        assert 'No link named "nonexistent"' in response.get_data(as_text=True)

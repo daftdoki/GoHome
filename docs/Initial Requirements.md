@@ -320,7 +320,12 @@ normalized slug, and exits.
 
 If a user visits a path that does not match any known link or category
 name, the service responds with an HTTP 302 redirect to the root
-directory page.
+directory page. For a single-segment path the redirect target is
+`/?notfound=<path>` (URL-encoded). When the root page receives a
+non-empty `notfound` parameter, it shows a notice above the directory
+(`No link named "<value>"`, auto-escaped and cut to 100 characters).
+Multi-segment paths redirect to plain `/` with no notice. The server
+sets no cookies and keeps no session state for this.
 
 ### Docker
 
@@ -443,9 +448,6 @@ considered for future development:
   directory page for quickly finding links.
 - **`base_url` support**: Add support for hosting behind a reverse proxy at
   a subpath (e.g., `/go`).
-- **Flash messages for unknown paths**: Display a notification on the
-  redirected page when a user visits an unknown path, indicating the
-  requested link was not found.
 - **Dynamic configuration reload**: Reload `config.yml` and
   `directory.yml` without requiring a service restart, either via
   file-watching or a reload signal.

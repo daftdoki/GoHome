@@ -383,6 +383,11 @@ A query string is forwarded to the destination, so `go/search?q=term`
 redirects to the link's URL with `?q=term` added. If the URL already has
 a query, the two are joined with `&`.
 
+If a path matches no link or category, GoHome sends you to the
+directory page with a notice above the list, such as `No link named
+"netflx"`. Paths with more than one segment (`go/a/b`) go to the
+directory page without a notice.
+
 ### Category Pages
 
 Use a category's slug to see only that section — `go/streaming` shows

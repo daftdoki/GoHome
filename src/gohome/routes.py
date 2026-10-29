@@ -1,14 +1,14 @@
 """Flask route handlers for the GoHome application.
 
 Defines the root directory page, slug-based redirects and category
-pages, custom theme CSS serving, and a ``Cache-Control: no-cache`` hook
-for HTML responses.
+pages, the favicon, custom theme CSS serving, and a
+``Cache-Control: no-cache`` hook for HTML responses.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import quote, urlsplit, urlunsplit
 
 import werkzeug
 from flask import Flask, Response, abort, redirect, render_template, request
@@ -16,6 +16,8 @@ from flask import Flask, Response, abort, redirect, render_template, request
 from gohome.models import AppConfig, Directory, LinkEntry
 from gohome.normalize import normalize_name
 from gohome.themes import resolve_theme
+
+_NOTFOUND_MAX_LENGTH = 100
 
 
 def append_query(url: str, query: bytes) -> str:
@@ -56,9 +58,19 @@ def register_routes(app: Flask) -> None:
             response.headers["Cache-Control"] = "no-cache"
         return response
 
+    @app.route("/favicon.ico")
+    def favicon() -> Response:
+        """Serve the bundled favicon at the site root where browsers look."""
+        return app.send_static_file("favicon.ico")
+
     @app.route("/")
     def root() -> str:
-        """Render the full link directory page."""
+        """Render the full link directory page.
+
+        A non-empty ``notfound`` query parameter (set by the redirect for
+        unknown paths) adds a notice naming the missing link, truncated to
+        ``_NOTFOUND_MAX_LENGTH`` characters.
+        """
         app_config: AppConfig = app.config["GOHOME_APP_CONFIG"]
         directory: Directory = app.config["GOHOME_DIRECTORY"]
         themes: list[str] = app.config["GOHOME_THEMES"]
@@ -73,6 +85,7 @@ def register_routes(app: Flask) -> None:
             page_description=None,
             items=directory.items,
             breadcrumbs=[("Home", None)],
+            notfound=request.args.get("notfound", "")[:_NOTFOUND_MAX_LENGTH],
             themes=themes,
             active_theme=active_theme,
             active_mode=active_mode,
@@ -85,8 +98,10 @@ def register_routes(app: Flask) -> None:
         """Resolve a URL path to a link redirect or category page.
 
         Single-segment paths are normalized and looked up in the directory.
-        Multi-segment paths and unknown slugs redirect to the root page.
-        Link redirects forward the request's query string to the target.
+        Multi-segment paths redirect to the root page. Unknown
+        single-segment paths redirect to ``/?notfound=<path>`` so the root
+        page can say which link was missing. Link redirects forward the
+        request's query string to the target.
 
         Args:
             path: The URL path after the domain.
@@ -106,7 +121,7 @@ def register_routes(app: Flask) -> None:
         item = directory.slug_map.get(slug)
 
         if item is None:
-            return redirect("/", code=302)
+            return redirect(f"/?notfound={quote(path, safe='')}", code=302)
 
         if isinstance(item, LinkEntry):
             return redirect(append_query(item.url, request.query_string), code=302)

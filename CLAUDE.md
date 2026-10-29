@@ -145,6 +145,16 @@ uv run python scripts/generate_screenshots.py
 - **Logging**: `create_app` calls `logging.basicConfig` at INFO before
   loading config, then sets the root level from `log_level`. An invalid
   level logs a warning and falls back to INFO.
+- **Unknown paths**: A single-segment path that matches nothing redirects
+  (302) to `/?notfound=<urlencoded path>`; the root page shows a
+  `p.notfound[role=status]` notice (value capped at 100 characters,
+  escaped by Jinja). Multi-segment paths redirect to plain `/`. This
+  replaces flash messages because the server has no session or secret key.
+- **Anchors**: The body anchor is `id="gohome-top"` so it cannot collide
+  with a category `id` (the category slug, e.g. a category named "Top").
+  Category ids stay as bare slugs because users bookmark `#slug`.
+- **Favicon**: `/favicon.ico` is an explicit route serving
+  `static/favicon.ico`; without it the catch-all would redirect.
 - **Cookies**: Server reads but never sets cookies; JS handles writes
 
 ## Coding Conventions

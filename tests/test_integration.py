@@ -155,10 +155,10 @@ class TestUnknownPaths:
     def test_nonexistent_redirects_to_root(
         self, integration_client: FlaskClient
     ) -> None:
-        """An unknown path redirects to the root."""
+        """An unknown path redirects to the root with a notfound hint."""
         response = integration_client.get("/nonexistent")
         assert response.status_code == 302
-        assert response.headers["Location"] == "/"
+        assert response.headers["Location"] == "/?notfound=nonexistent"
 
     def test_multi_segment_redirects_to_root(
         self, integration_client: FlaskClient
@@ -197,7 +197,7 @@ class TestCategoryNav:
         """The root page contains back-to-top links."""
         html = integration_client.get("/").get_data(as_text=True)
         assert 'class="back-to-top"' in html
-        assert "#top" in html
+        assert 'href="#gohome-top"' in html
 
     def test_category_page_no_category_nav(
         self, integration_client: FlaskClient

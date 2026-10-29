@@ -19,6 +19,10 @@ run once per clone.
 
 ## Running
 
+`python -m gohome` serves the app with waitress, both locally and in
+the Docker image. The image runs as the unprivileged `gohome` user
+(UID 10001) and starts `/app/.venv/bin/python` directly.
+
 ```bash
 uv run python -m gohome [config_dir]
 # Example with sample config:
@@ -92,7 +96,7 @@ uv run python scripts/generate_screenshots.py
 
 - `src/gohome/` — Main application package (src layout)
   - `__init__.py` — App factory (`create_app`)
-  - `__main__.py` — CLI entry point
+  - `__main__.py` — CLI entry point (serves with waitress)
   - `config.py` — Config loading and validation
   - `models.py` — Frozen dataclasses (`LinkEntry`, `CategoryEntry`, etc.)
   - `normalize.py` — Name-to-slug normalization

@@ -150,16 +150,19 @@ class TestEnvVarOverrides:
         with pytest.raises(SystemExit):
             create_app(str(tmp_path))
 
-    def test_main_calls_run_with_resolved_config(
+    def test_main_serves_with_waitress_using_resolved_config(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """The main() function passes resolved config values to app.run()."""
+        """The main() function passes resolved config values to waitress.serve()."""
         _write_yaml(tmp_path, "directory.yml", _MINIMAL_DIR)
         monkeypatch.setenv("GOHOME_HOST", "1.2.3.4")
         monkeypatch.setenv("GOHOME_PORT", "4444")
         monkeypatch.setattr("sys.argv", ["gohome", str(tmp_path)])
 
-        with patch("gohome.__main__.create_app") as mock_create:
+        with (
+            patch("gohome.__main__.create_app") as mock_create,
+            patch("waitress.serve") as mock_serve,
+        ):
             mock_app = mock_create.return_value
             mock_app.config = {
                 "GOHOME_APP_CONFIG": AppConfig(host="1.2.3.4", port=4444)
@@ -167,4 +170,4 @@ class TestEnvVarOverrides:
             from gohome.__main__ import main
 
             main()
-            mock_app.run.assert_called_once_with(host="1.2.3.4", port=4444)
+            mock_serve.assert_called_once_with(mock_app, host="1.2.3.4", port=4444)

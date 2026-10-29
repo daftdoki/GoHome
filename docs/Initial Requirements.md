@@ -325,8 +325,9 @@ directory page.
 
 The application targets Python 3.14 (currently 3.14.3) and uses
 `python:3.14-slim` as the Docker base image. The Docker container runs
-Flask's built-in development server. The host and port the application
-binds to are resolved using the following priority order: environment
+the app under the waitress WSGI server as an unprivileged user (UID
+10001) and reads the `/config` mount without write access. The host and
+port the application binds to are resolved using the following priority order: environment
 variables (`GOHOME_HOST` /
 `GOHOME_PORT`) take precedence over `config.yml` values, which take
 precedence over built-in defaults (`0.0.0.0` / `8080`). The Dockerfile
@@ -421,9 +422,6 @@ include the original names and the resulting slug (e.g., `Name collision:
 The following items are out of scope for the initial version but should be
 considered for future development:
 
-- **Production WSGI server**: Evaluate whether to replace Flask's built-in
-  development server with a production WSGI server (e.g., gunicorn or
-  waitress) for the Docker deployment.
 - **Client-side search/filter**: Add a simple search or filter box to the
   directory page for quickly finding links.
 - **`base_url` support**: Add support for hosting behind a reverse proxy at

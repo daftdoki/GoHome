@@ -615,7 +615,7 @@ the same suite that CI runs.
 
 ```bash
 uv run python -m gohome sample_config/
-# Server starts at http://localhost:8080
+# Waitress serves at http://localhost:8080
 ```
 
 Or use the build-from-source Docker Compose files:

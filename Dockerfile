@@ -18,6 +18,14 @@ RUN uv sync --frozen --no-dev
 ENV GOHOME_HOST=0.0.0.0
 ENV GOHOME_PORT=8080
 
+# Run as an unprivileged user. It only needs read access to /app and the
+# read-only /config mount, so nothing is chowned.
+RUN groupadd --system --gid 10001 gohome \
+    && useradd --system --uid 10001 --gid gohome --no-create-home \
+        --shell /usr/sbin/nologin gohome
+USER gohome
+
 EXPOSE 8080
 
-CMD ["uv", "run", "python", "-m", "gohome", "/config"]
+# Call the venv interpreter directly so uv does not re-sync at startup.
+CMD ["/app/.venv/bin/python", "-m", "gohome", "/config"]

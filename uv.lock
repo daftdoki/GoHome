@@ -1,9 +1,9 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.14"
 
 [options]
-exclude-newer = "2026-03-22T23:25:23.153896Z"
+exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
 exclude-newer-span = "P2W"
 
 [[package]]
@@ -110,6 +110,7 @@ source = { editable = "." }
 dependencies = [
     { name = "flask" },
     { name = "pyyaml" },
+    { name = "waitress" },
 ]
 
 [package.optional-dependencies]
@@ -119,6 +120,7 @@ dev = [
     { name = "ruff" },
     { name = "types-flask" },
     { name = "types-pyyaml" },
+    { name = "types-waitress" },
     { name = "yamllint" },
 ]
 e2e = [
@@ -139,6 +141,8 @@ requires-dist = [
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.11" },
     { name = "types-flask", marker = "extra == 'dev'", specifier = ">=1.1" },
     { name = "types-pyyaml", marker = "extra == 'dev'", specifier = ">=6.0" },
+    { name = "types-waitress", marker = "extra == 'dev'", specifier = ">=3.0.1.20260724" },
+    { name = "waitress", specifier = ">=3.0.2" },
     { name = "yamllint", marker = "extra == 'dev'", specifier = ">=1.35" },
 ]
 provides-extras = ["dev", "screenshots", "e2e"]
@@ -553,6 +557,15 @@ wheels = [
 ]
 
 [[package]]
+name = "types-waitress"
+version = "3.0.1.20260724"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a0/79/87852f3ed81730ad64cdd16fe14dd664f7403aec9643c5a72d1bf36ec454/types_waitress-3.0.1.20260724.tar.gz", hash = "sha256:dc05abee59c067cf94edc273b19d38b2b9b456e544ead280b2edfefdc8851811", size = 14533, upload-time = "2026-07-24T04:57:51.05Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8f/76/9892eacf410bf177167257284afbe9fb565d98f8905e29246f31f57463c6/types_waitress-3.0.1.20260724-py3-none-any.whl", hash = "sha256:bcbeb4fd3d7e864e228c9bea01580acab0d9addb10ffc8d37b914a625a13fc34", size = 17499, upload-time = "2026-07-24T04:57:50.137Z" },
+]
+
+[[package]]
 name = "types-werkzeug"
 version = "1.0.9"
 source = { registry = "https://pypi.org/simple" }
@@ -577,6 +590,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/c7/24/5f1b3bdffd70275f6661c76461e25f024d5a38a46f04aaca912426a2b1d3/urllib3-2.6.3.tar.gz", hash = "sha256:1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed", size = 435556, upload-time = "2026-01-07T16:24:43.925Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/39/08/aaaad47bc4e9dc8c725e68f9d04865dbcb2052843ff09c97b08904852d84/urllib3-2.6.3-py3-none-any.whl", hash = "sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4", size = 131584, upload-time = "2026-01-07T16:24:42.685Z" },
+]
+
+[[package]]
+name = "waitress"
+version = "3.0.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/bf/cb/04ddb054f45faa306a230769e868c28b8065ea196891f09004ebace5b184/waitress-3.0.2.tar.gz", hash = "sha256:682aaaf2af0c44ada4abfb70ded36393f0e307f4ab9456a215ce0020baefc31f", size = 179901, upload-time = "2024-11-16T20:02:35.195Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8d/57/a27182528c90ef38d82b636a11f606b0cbb0e17588ed205435f8affe3368/waitress-3.0.2-py3-none-any.whl", hash = "sha256:c56d67fd6e87c2ee598b76abdd4e96cfad1f24cacdea5078d382b1f9d7b5ed2e", size = 56232, upload-time = "2024-11-16T20:02:33.858Z" },
 ]
 
 [[package]]

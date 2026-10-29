@@ -379,6 +379,10 @@ even though Netflix is listed under Streaming. If a link has
 [aliases](#aliases), those work too — `go/search` redirects to the
 same place as `go/google`.
 
+A query string is forwarded to the destination, so `go/search?q=term`
+redirects to the link's URL with `?q=term` added. If the URL already has
+a query, the two are joined with `&`.
+
 ### Category Pages
 
 Use a category's slug to see only that section — `go/streaming` shows

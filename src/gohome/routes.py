@@ -8,6 +8,7 @@ for HTML responses.
 from __future__ import annotations
 
 from pathlib import Path
+from urllib.parse import urlsplit, urlunsplit
 
 import werkzeug
 from flask import Flask, Response, abort, redirect, render_template, request
@@ -15,6 +16,29 @@ from flask import Flask, Response, abort, redirect, render_template, request
 from gohome.models import AppConfig, Directory, LinkEntry
 from gohome.normalize import normalize_name
 from gohome.themes import resolve_theme
+
+
+def append_query(url: str, query: bytes) -> str:
+    """Append a raw query string to *url*, ahead of any fragment.
+
+    The query bytes are decoded as Latin-1 so they round-trip unchanged,
+    keeping percent-encoding and ``+`` exactly as the client sent them.
+    If *url* already has a query, the new one is joined with ``&``.
+
+    Args:
+        url: The configured target URL.
+        query: The raw incoming query string, without the leading ``?``.
+
+    Returns:
+        *url* unchanged when *query* is empty, otherwise *url* with the
+        query added.
+    """
+    if not query:
+        return url
+    parts = urlsplit(url)
+    extra = query.decode("latin-1")
+    combined = f"{parts.query}&{extra}" if parts.query else extra
+    return urlunsplit(parts._replace(query=combined))
 
 
 def register_routes(app: Flask) -> None:
@@ -62,6 +86,7 @@ def register_routes(app: Flask) -> None:
 
         Single-segment paths are normalized and looked up in the directory.
         Multi-segment paths and unknown slugs redirect to the root page.
+        Link redirects forward the request's query string to the target.
 
         Args:
             path: The URL path after the domain.
@@ -84,7 +109,7 @@ def register_routes(app: Flask) -> None:
             return redirect("/", code=302)
 
         if isinstance(item, LinkEntry):
-            return redirect(item.url, code=302)
+            return redirect(append_query(item.url, request.query_string), code=302)
 
         # CategoryEntry — render the category page
         bundled_themes: frozenset[str] = app.config["GOHOME_BUNDLED_THEMES"]

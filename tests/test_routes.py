@@ -4,8 +4,32 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from gohome import create_app
+
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from flask.testing import FlaskClient
+
+_QUERY_DIRECTORY_YML = """\
+directory:
+  - name: Plain
+    url: https://x.test/page
+  - name: Existing
+    url: https://x.test/?a=1
+  - name: Fragment
+    url: https://x.test/page#sec
+  - name: Both
+    url: https://x.test/page?a=1#sec
+"""
+
+
+def _query_client(tmp_path: Path) -> FlaskClient:
+    """Build a test client for links with pre-existing queries and fragments."""
+    (tmp_path / "directory.yml").write_text(_QUERY_DIRECTORY_YML, encoding="utf-8")
+    application = create_app(str(tmp_path))
+    application.config["TESTING"] = True
+    return application.test_client()
 
 
 class TestRootPage:
@@ -74,6 +98,61 @@ class TestLinkRedirect:
         response = client.get("/nf")
         assert response.status_code == 302
         assert response.headers["Location"] == "https://netflix.com"
+
+
+class TestQueryPassthrough:
+    """Verify the incoming query string is forwarded to the target URL."""
+
+    def test_query_appended(self, client: FlaskClient) -> None:
+        """A query string is appended to a target without one."""
+        response = client.get("/kagi?q=hello")
+        assert response.status_code == 302
+        assert response.headers["Location"] == "https://kagi.com?q=hello"
+
+    def test_no_query_leaves_url_unchanged(self, client: FlaskClient) -> None:
+        """Without a query string the target is the configured URL."""
+        response = client.get("/kagi")
+        assert response.headers["Location"] == "https://kagi.com"
+
+    def test_empty_query_leaves_url_unchanged(self, client: FlaskClient) -> None:
+        """A bare trailing ``?`` adds nothing to the target."""
+        response = client.get("/kagi?")
+        assert response.headers["Location"] == "https://kagi.com"
+
+    def test_raw_encoding_preserved(self, client: FlaskClient) -> None:
+        """Percent-encoding and ``+`` pass through byte for byte."""
+        response = client.get("/kagi?q=a%20b+c%2Fd&x=%E2%9C%93")
+        assert response.headers["Location"] == (
+            "https://kagi.com?q=a%20b+c%2Fd&x=%E2%9C%93"
+        )
+
+    def test_existing_query_joined_with_ampersand(self, tmp_path: Path) -> None:
+        """A target that already has a query gets ``&`` plus the new one."""
+        response = _query_client(tmp_path).get("/existing?q=hello")
+        assert response.headers["Location"] == "https://x.test/?a=1&q=hello"
+
+    def test_query_goes_before_fragment(self, tmp_path: Path) -> None:
+        """The query is inserted ahead of the target's fragment."""
+        response = _query_client(tmp_path).get("/fragment?q=hello")
+        assert response.headers["Location"] == "https://x.test/page?q=hello#sec"
+
+    def test_existing_query_and_fragment(self, tmp_path: Path) -> None:
+        """A target with both gets the query joined and the fragment kept last."""
+        response = _query_client(tmp_path).get("/both?q=hello")
+        assert response.headers["Location"] == "https://x.test/page?a=1&q=hello#sec"
+
+    def test_category_page_ignores_query(self, client: FlaskClient) -> None:
+        """Category pages still render normally with a query string."""
+        response = client.get("/streaming?q=hello")
+        assert response.status_code == 200
+
+    def test_unknown_slug_redirects_to_root_without_query(
+        self, client: FlaskClient
+    ) -> None:
+        """Unknown slugs still redirect to ``/`` and drop the query."""
+        response = client.get("/nope?q=hello")
+        assert response.status_code == 302
+        assert response.headers["Location"] == "/"
 
 
 class TestCategoryPage:

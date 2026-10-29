@@ -114,6 +114,16 @@ class TestLinkRedirect:
         assert response.headers["Location"] == "https://github.com"
 
 
+class TestQueryPassthrough:
+    """Redirects forward the incoming query string."""
+
+    def test_query_forwarded(self, integration_client: FlaskClient) -> None:
+        """Visiting /google?q=hello redirects to https://google.com?q=hello."""
+        response = integration_client.get("/google?q=hello")
+        assert response.status_code == 302
+        assert response.headers["Location"] == "https://google.com?q=hello"
+
+
 class TestCategoryListing:
     """Scenario 3: Category name path returns that category's link listing."""
 

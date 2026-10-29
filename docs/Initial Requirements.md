@@ -406,6 +406,14 @@ with an HTTP 302 (temporary) redirect to the configured URL. This ensures
 that if the admin changes a link's destination, users immediately get the
 updated URL without browser caching issues.
 
+If the request has a query string, the service appends it unchanged (raw,
+without decoding or re-encoding) to the configured URL. When the URL
+already has a query, the two are joined with `&`. When the URL has a
+fragment, the query is placed before it, so `/link?q=x` for
+`https://example.com/page#sec` redirects to
+`https://example.com/page?q=x#sec`. Without a query string, the redirect
+target is exactly the configured URL.
+
 ### Name Normalization
 
 Link and category names are normalized to URL-safe slugs using the following

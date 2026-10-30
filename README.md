@@ -264,6 +264,17 @@ then visit `go/` from any device on your tailnet. Try `go/google`
 
 If something is not working, see [Troubleshooting](#troubleshooting).
 
+The image has a built-in healthcheck that requests `/` on
+`127.0.0.1:GOHOME_PORT` every 30 seconds, and every 2 seconds just after
+start. It needs `GOHOME_HOST` to be `0.0.0.0` or `127.0.0.1`, which both
+Compose files already use. `docker compose ps` shows
+`(healthy)` or `(unhealthy)` next to the GoHome container. To see the
+last few check results:
+
+```bash
+docker inspect --format '{{json .State.Health}}' <container>
+```
+
 ### Updating
 
 Pull the latest image and restart:
@@ -370,6 +381,16 @@ even though Netflix is listed under Streaming. If a link has
 [aliases](#aliases), those work too — `go/search` redirects to the
 same place as `go/google`.
 
+A query string is forwarded to the destination, so `go/search?q=term`
+redirects to the link's URL with `?q=term` added. If the URL already has
+a query, the two are joined with `&`.
+
+If a path matches no link or category, GoHome sends you to the
+directory page with a notice above the list, such as `No link named
+"netflx"`. The notice shows the path as a slug, so `go/Net Flx` reports
+`net-flx`. Paths with more than one segment (`go/a/b`) go to the
+directory page without a notice.
+
 ### Category Pages
 
 Use a category's slug to see only that section — `go/streaming` shows
@@ -438,10 +459,13 @@ directory:
 
 - Every entry must have a `name`
 - Entries must have either `url` (link) or `entries` (category)
-- If both `url` and `entries` are present, it is treated as a category
+- If both `url` and `entries` are present, it is treated as a category and
+  GoHome logs a warning that the `url` is ignored
 - Category `entries` must not be empty
 - Names and aliases must be globally unique after slug normalization
-- Only one level of nesting is supported
+- Link `url` values must be `http` or `https` URLs with a host
+- Only one level of nesting is supported. A category inside a category is
+  a startup error
 - The `description` and `aliases` fields are optional
 
 If the configuration is invalid, GoHome will not start. Run
@@ -452,11 +476,24 @@ If the configuration is invalid, GoHome will not start. Run
 Each name is converted into a URL-safe slug. The rules, applied in
 order:
 
-1. Lowercase the name
-2. Replace spaces with hyphens
-3. Remove all characters except letters, digits, and hyphens
-4. Collapse consecutive hyphens into one
-5. Strip leading and trailing hyphens
+1. Fold accented letters to their ASCII base letter (`Café` becomes
+   `cafe`, `Ñandú` becomes `nandu`)
+2. Lowercase the name
+3. Replace spaces with hyphens
+4. Remove all characters except ASCII letters, digits, and hyphens
+5. Collapse consecutive hyphens into one
+6. Strip leading and trailing hyphens
+
+Characters with no ASCII form, such as CJK, are still removed. A name made
+only of such characters produces an empty slug and fails startup.
+Incoming request paths are folded the same way, so `go/café` and `go/cafe`
+both resolve.
+
+Slugs that used to drop accented letters now keep their base letter:
+`Café` was `caf` and is now `cafe`. Check bookmarks and aliases that
+relied on the old slugs. Two names that used to be distinct can now
+collide, such as `Café` and `Cafe`. GoHome refuses to start on a
+collision, so rename one of them before upgrading.
 
 Because slugs must be unique, two entries whose names normalize to the
 same slug (e.g., "My Link" and "my-link") cause a validation error at
@@ -500,6 +537,11 @@ port: 8080                  # Bind port
 log_level: "info"           # debug, info, warning, error
 default_theme: "default"    # Theme for first-time visitors
 ```
+
+At `info`, GoHome logs one line per request with the method, path,
+status, and redirect target, for example
+`INFO: GET /google?q=1 302 -> https://google.com?q=1`. Set `log_level`
+to `warning` to turn these off.
 
 You can also download the sample file:
 
@@ -564,7 +606,9 @@ steps.
 
 ### GoHome is not reachable
 
-Verify both containers are running (`docker compose ps`), check
+Verify both containers are running (`docker compose ps`; the GoHome
+container should show `healthy`). To see why a check failed, run
+`docker inspect --format '{{json .State.Health}}' <container>`. Check
 GoHome logs (`docker compose logs gohome`), and ensure
 `network_mode: service:tailscale` is set in the Compose file.
 
@@ -630,7 +674,7 @@ the same suite that CI runs.
 
 ```bash
 uv run python -m gohome sample_config/
-# Server starts at http://localhost:8080
+# Waitress serves at http://localhost:8080
 ```
 
 Or use the build-from-source Docker Compose files:

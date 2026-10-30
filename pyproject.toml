@@ -7,6 +7,7 @@ requires-python = ">=3.14"
 dependencies = [
     "flask>=3.1",
     "pyyaml>=6.0",
+    "waitress>=3.0.2",
 ]
 
 [project.optional-dependencies]
@@ -17,6 +18,7 @@ dev = [
     "types-PyYAML>=6.0",
     "types-Flask>=1.1",
     "yamllint>=1.35",
+    "types-waitress>=3.0.1.20260724",
 ]
 screenshots = [
     "playwright>=1.40",

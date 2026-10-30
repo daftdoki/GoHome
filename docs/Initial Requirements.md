@@ -225,12 +225,13 @@ The `description` key is always optional.
 The directory yaml is a list called `directory` that contains entries for
 either a category when the `entries` key is present, or a link when the
 `url` key is present. If both `entries` and `url` are present, `url` is
-ignored and the entry is assumed to be a category. The `entries` key
-contains a list of links for the category. Only one level of category is
-supported and any categories defined inside of a category are ignored.
-All entries inside a nested category (including regular links) are also
-discarded. The service logs a warning at startup identifying any nested
-categories that were skipped, including a count of discarded entries.
+ignored, the entry is assumed to be a category, and the service logs a
+warning naming the entry. The `entries` key contains a list of links for
+the category. A link `url` must be an `http` or `https` URL with a host;
+anything else is a configuration error. Only one level of category is
+supported. A category defined inside a category is a configuration error:
+the service logs an error naming the nested category and its parent, then
+exits.
 
 ### config.yml
 
@@ -309,8 +310,9 @@ using the same rules as entry names, so `go/Netflix`, `go/NETFLIX`,
 and `go/netflix` all resolve to the same entry.
 
 Only flat, single-segment paths are supported. Nested paths like
-`go/streaming/netflix` are not valid and are treated the same as any
-unknown path. There is no hierarchical path routing.
+`go/streaming/netflix` are not valid. They redirect to the root
+directory page with no not-found notice. There is no hierarchical path
+routing.
 
 If any two entries (whether links, categories, or a mix) normalize to the
 same slug, this is treated as a configuration error. The service logs an
@@ -319,20 +321,38 @@ normalized slug, and exits.
 
 If a user visits a path that does not match any known link or category
 name, the service responds with an HTTP 302 redirect to the root
-directory page.
+directory page. For a single-segment path the redirect target is
+`/?notfound=<path>` (URL-encoded). When the root page receives a
+`notfound` parameter, it normalizes the value to a slug, cuts it to 100
+characters, and shows a notice above the directory
+(`No link named "<slug>"`). Showing the slug instead of the raw value
+means a crafted link can't display arbitrary text. If the slug is empty,
+no notice is shown.
+Multi-segment paths redirect to plain `/` with no notice. The server
+sets no cookies and keeps no session state for this.
 
 ### Docker
 
 The application targets Python 3.14 (currently 3.14.3) and uses
 `python:3.14-slim` as the Docker base image. The Docker container runs
-Flask's built-in development server. The host and port the application
-binds to are resolved using the following priority order: environment
+the app under the waitress WSGI server as an unprivileged user (UID
+10001) and reads the `/config` mount without write access. The host and
+port the application binds to are resolved using the following priority order: environment
 variables (`GOHOME_HOST` /
 `GOHOME_PORT`) take precedence over `config.yml` values, which take
 precedence over built-in defaults (`0.0.0.0` / `8080`). The Dockerfile
 sets `GOHOME_HOST=0.0.0.0` and `GOHOME_PORT=8080` so that the container
 binds correctly regardless of what `config.yml` contains. External port
 mapping is handled entirely by docker-compose.
+
+The image defines a `HEALTHCHECK` that requests `/` on `127.0.0.1` at
+`GOHOME_PORT` using python's `urllib` (the slim image has no curl or
+wget). It probes every 2 seconds during a 10-second start period, then
+every 30 seconds. Because it targets `127.0.0.1`, `GOHOME_HOST` must be
+`0.0.0.0` or `127.0.0.1` inside the container. Docker reports the result
+in `docker compose ps` and
+`docker inspect`, and the deploy hook uses
+`docker compose up -d --wait` to block until the container is healthy.
 
 A single bind mount directory is mapped into the container containing all
 user-provided files:
@@ -399,15 +419,25 @@ with an HTTP 302 (temporary) redirect to the configured URL. This ensures
 that if the admin changes a link's destination, users immediately get the
 updated URL without browser caching issues.
 
+If the request has a query string, the service appends it unchanged (raw,
+without decoding or re-encoding) to the configured URL. When the URL
+already has a query, the two are joined with `&`. When the URL has a
+fragment, the query is placed before it, so `/link?q=x` for
+`https://example.com/page#sec` redirects to
+`https://example.com/page?q=x#sec`. Without a query string, the redirect
+target is exactly the configured URL.
+
 ### Name Normalization
 
 Link and category names are normalized to URL-safe slugs using the following
 rules:
 
+- Apply Unicode NFKD normalization and drop combining marks, so accented
+  letters fold to their base letter (`Café` becomes `cafe`)
 - Convert to lowercase
 - Replace spaces with hyphens (`-`)
 - Strip all characters that are not ASCII letters, ASCII digits, or hyphens
-  (non-ASCII characters like accented letters are removed)
+  (characters with no ASCII form, such as CJK, are removed)
 - Collapse consecutive hyphens into a single hyphen
 
 For example: `My Cool Link!` becomes `my-cool-link`. Name uniqueness is
@@ -421,16 +451,10 @@ include the original names and the resulting slug (e.g., `Name collision:
 The following items are out of scope for the initial version but should be
 considered for future development:
 
-- **Production WSGI server**: Evaluate whether to replace Flask's built-in
-  development server with a production WSGI server (e.g., gunicorn or
-  waitress) for the Docker deployment.
 - **Client-side search/filter**: Add a simple search or filter box to the
   directory page for quickly finding links.
 - **`base_url` support**: Add support for hosting behind a reverse proxy at
   a subpath (e.g., `/go`).
-- **Flash messages for unknown paths**: Display a notification on the
-  redirected page when a user visits an unknown path, indicating the
-  requested link was not found.
 - **Dynamic configuration reload**: Reload `config.yml` and
   `directory.yml` without requiring a service restart, either via
   file-watching or a reload signal.

@@ -19,6 +19,10 @@ run once per clone.
 
 ## Running
 
+`python -m gohome` serves the app with waitress, both locally and in
+the Docker image. The image runs as the unprivileged `gohome` user
+(UID 10001) and starts `/app/.venv/bin/python` directly.
+
 ```bash
 uv run python -m gohome [config_dir]
 # Example with sample config:
@@ -92,7 +96,7 @@ uv run python scripts/generate_screenshots.py
 
 - `src/gohome/` — Main application package (src layout)
   - `__init__.py` — App factory (`create_app`)
-  - `__main__.py` — CLI entry point
+  - `__main__.py` — CLI entry point (serves with waitress)
   - `config.py` — Config loading and validation
   - `models.py` — Frozen dataclasses (`LinkEntry`, `CategoryEntry`, etc.)
   - `normalize.py` — Name-to-slug normalization
@@ -129,6 +133,34 @@ uv run python scripts/generate_screenshots.py
   Custom themes cannot shadow bundled theme names.
 - **Adding a bundled theme**: copy the CSS to `src/gohome/static/` and
   add the name to `BUNDLED_THEMES` in `themes.py`
+- **Link URLs**: `_process_entry` requires link `url` values to be
+  `http`/`https` with a host (scheme compared case-insensitively);
+  anything else exits at startup.
+- **Nested categories**: A category inside a category logs an error naming
+  both and exits. An entry with both `url` and `entries` logs a warning and
+  stays a category.
+- **Slug normalization**: `normalize_name` folds accents to ASCII (NFKD,
+  combining marks dropped) before the other rules. Request paths use the
+  same function.
+- **Logging**: `create_app` calls `logging.basicConfig` at INFO before
+  loading config, then sets the root level from `log_level`.
+  `load_app_config` replaces an invalid level with `info` and logs a
+  warning.
+- **Unknown paths**: A single-segment path that matches nothing redirects
+  (302) to `/?notfound=<urlencoded path>`; the root page shows a
+  `p.notfound[role=status]` notice. The root route shows the value
+  passed through `normalize_name` and capped at 100 characters, so a
+  crafted link can't put prose on the page. An empty slug shows no
+  notice. Multi-segment paths redirect to plain `/`. This
+  replaces flash messages because the server has no session or secret key.
+- **Anchors**: The body anchor is `id="gohome-top"` so it cannot collide
+  with a category `id` (the category slug, e.g. a category named "Top").
+  Category ids stay as bare slugs because users bookmark `#slug`.
+- **Favicon**: `/favicon.ico` is an explicit route serving
+  `static/favicon.ico`; without it the catch-all would redirect.
+- **Request log**: waitress writes no access log, so an `after_request`
+  hook in `routes.py` logs one INFO line per request (method, path,
+  status, and redirect target).
 - **Cookies**: Server reads but never sets cookies; JS handles writes
 - **Tailscale identity**: When `AppConfig.host` is a loopback address
   (`127.0.0.1`, `::1`, `localhost`), a context processor reads

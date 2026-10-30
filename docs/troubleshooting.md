@@ -29,3 +29,33 @@ container as a different node and assigns a suffixed hostname like
 
 **Prevention:** Use a reusable auth key with a tag so that
 re-registration is seamless when moving between hosts.
+
+---
+
+## Checking container health
+
+**Problem:** The GoHome container is running but the site does not
+respond, or a deploy fails waiting for the container to become healthy.
+
+**Solution:**
+
+The image has a healthcheck that requests `http://127.0.0.1:$GOHOME_PORT/`.
+It checks every 2 seconds during the first 10 seconds after start, then
+every 30 seconds, and marks the container `unhealthy` after three
+consecutive failures. Because it always uses `127.0.0.1`, set
+`GOHOME_HOST` to `0.0.0.0` or `127.0.0.1` inside the container. Any other
+bind address leaves the container `unhealthy`.
+
+1. See the status in the `STATUS` column:
+   `docker compose ps`
+   (`healthy`, `unhealthy`, or `health: starting` until the first
+   check passes)
+2. See the recent check results and error output:
+   `docker inspect --format '{{json .State.Health}}' <container>`
+   (find the name with `docker compose ps`)
+3. Read the app logs:
+   `docker compose logs --tail 50 gohome`
+
+**Notes:** The post-receive deploy hook runs
+`docker compose up -d --wait --wait-timeout 60` and prints the last 50
+log lines if the container is not healthy in time.

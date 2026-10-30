@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="{{ url_for('serve_theme_css', theme_name=active_theme) }}">
     {% endif %}
 </head>
-<body class="{{ active_mode }}" id="top">
+<body class="{{ active_mode }}" id="gohome-top">
     <header>
         <h1>{{ site_title }}</h1>
         <div class="nav-row">
@@ -25,7 +25,7 @@
                     {% endif %}
                 {% endfor %}
             </nav>
-            {% if not page_title %}
+            {% if not page_title and items|select('category')|first is defined %}
             <nav class="category-nav" aria-label="Category navigation">
                 Categories:
                 {% for item in items if item is category %}
@@ -37,6 +37,9 @@
     </header>
 
     <main>
+        {% if notfound %}
+        <p class="notfound" role="status">No link named "{{ notfound }}"</p>
+        {% endif %}
 
         {% if page_title %}
         <h2>{{ page_title }}</h2>
@@ -69,7 +72,7 @@
                     {% endfor %}
                     </ul>
                     {% if not page_title %}
-                    <p class="back-to-top"><a href="#top">&uarr; Top</a></p>
+                    <p class="back-to-top"><a href="#gohome-top">&uarr; Top</a></p>
                     {% endif %}
                 </details>
             </li>

@@ -400,6 +400,23 @@ header h1::after {
 }
 
 /* ------------------------------------------------------------------ */
+/* Link-not-found notice (root page, after redirect from unknown path) */
+/* ------------------------------------------------------------------ */
+.notfound {
+    margin: 0 0 var(--spacing);
+    padding: 0.3rem 0;
+    border-bottom: 1px dashed var(--color-border);
+    color: var(--color-text);
+    text-shadow: 0 0 6px var(--color-glow);
+    overflow-wrap: anywhere;
+}
+
+.notfound::before {
+    content: "> ";
+    color: var(--color-link);
+}
+
+/* ------------------------------------------------------------------ */
 /* Back to top                                                        */
 /* ------------------------------------------------------------------ */
 .back-to-top {

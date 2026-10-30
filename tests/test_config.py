@@ -318,10 +318,10 @@ class TestLoadDirectoryErrors:
         with pytest.raises(SystemExit):
             load_directory(str(tmp_path))
 
-    def test_nested_category_skipped(
+    def test_nested_category_exits(
         self, tmp_path: Path, caplog: pytest.LogCaptureFixture
     ) -> None:
-        """Nested categories are warned about and skipped."""
+        """A category nested inside a category is a fatal error."""
         _write_yaml(
             tmp_path,
             "directory.yml",
@@ -335,9 +335,105 @@ class TestLoadDirectoryErrors:
                 "            url: https://deep.com\n"
             ),
         )
+        with pytest.raises(SystemExit):
+            load_directory(str(tmp_path))
+        assert "Inner" in caplog.text
+        assert "Outer" in caplog.text
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "javascript:alert(1)",
+            "data:text/html,hi",
+            "ftp://files.example.com",
+            "mailto:a@example.com",
+            "/foo",
+            "example.com",
+            "https://",
+            "http:///path",
+            "123",
+            "[1, 2]",
+            '"https://a.example.com\\n"',
+            '" https://a.example.com"',
+            '"https://a.exa\\nmple.com"',
+            '"https://a.example.com/\\tx"',
+        ],
+    )
+    def test_invalid_link_url_exits(
+        self, tmp_path: Path, caplog: pytest.LogCaptureFixture, url: str
+    ) -> None:
+        """Link URLs that are not http(s) with a host are fatal errors."""
+        _write_yaml(
+            tmp_path,
+            "directory.yml",
+            f"directory:\n  - name: Bad\n    url: {url}\n",
+        )
+        with pytest.raises(SystemExit):
+            load_directory(str(tmp_path))
+        assert "Bad" in caplog.text
+
+    def test_invalid_nested_link_url_exits(self, tmp_path: Path) -> None:
+        """URL validation also applies to links inside a category."""
+        _write_yaml(
+            tmp_path,
+            "directory.yml",
+            (
+                "directory:\n"
+                "  - name: Cat\n"
+                "    entries:\n"
+                "      - name: Bad\n"
+                "        url: javascript:alert(1)\n"
+            ),
+        )
+        with pytest.raises(SystemExit):
+            load_directory(str(tmp_path))
+
+    def test_null_link_url_exits(self, tmp_path: Path) -> None:
+        """A null (non-string) URL is a fatal error."""
+        _write_yaml(tmp_path, "directory.yml", "directory:\n  - name: Bad\n    url:\n")
+        with pytest.raises(SystemExit):
+            load_directory(str(tmp_path))
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "http://nas.local:5000",
+            "https://x.com/a?b=c#d",
+            "HTTPS://Example.com",
+        ],
+    )
+    def test_valid_link_urls_accepted(self, tmp_path: Path, url: str) -> None:
+        """http and https URLs with a host load, scheme case-insensitive."""
+        _write_yaml(
+            tmp_path,
+            "directory.yml",
+            f"directory:\n  - name: Ok\n    url: {url}\n",
+        )
         directory = load_directory(str(tmp_path))
-        assert "inner" not in directory.slug_map
-        assert "Nested category" in caplog.text
+        item = directory.slug_map["ok"]
+        assert isinstance(item, LinkEntry)
+        assert item.url == url
+
+    def test_url_and_entries_warns_and_stays_category(
+        self, tmp_path: Path, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """An entry with both url and entries warns and is a category."""
+        _write_yaml(
+            tmp_path,
+            "directory.yml",
+            (
+                "directory:\n"
+                "  - name: Both\n"
+                "    url: https://both.com\n"
+                "    entries:\n"
+                "      - name: Child\n"
+                "        url: https://child.com\n"
+            ),
+        )
+        directory = load_directory(str(tmp_path))
+        assert isinstance(directory.slug_map["both"], CategoryEntry)
+        assert "Both" in caplog.text
+        assert any(r.levelname == "WARNING" for r in caplog.records)
 
     def test_non_mapping_entry(self, tmp_path: Path) -> None:
         """A non-mapping entry in the list is a fatal error."""

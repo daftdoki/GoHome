@@ -26,9 +26,15 @@ class TestNormalizeName:
         """Leading and trailing hyphens are removed."""
         assert normalize_name("-hello-") == "hello"
 
-    def test_unicode_stripped(self) -> None:
-        """Non-ASCII characters (accented letters, etc.) are removed."""
-        assert normalize_name("café") == "caf"
+    def test_accents_folded(self) -> None:
+        """Accented letters fold to their ASCII base letter."""
+        assert normalize_name("Café") == "cafe"
+        assert normalize_name("Ñandú") == "nandu"
+
+    def test_unicode_without_ascii_form_stripped(self) -> None:
+        """Characters with no ASCII decomposition are removed."""
+        assert normalize_name("日本語") == ""
+        assert normalize_name("日本 Café") == "cafe"
 
     def test_all_special_returns_empty(self) -> None:
         """A name with no ASCII alphanumeric characters normalizes to empty."""

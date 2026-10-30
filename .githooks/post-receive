@@ -43,17 +43,13 @@ docker compose down
 echo "Building Docker image..."
 docker compose build
 
-echo "Starting container..."
-docker compose up -d
-
-# Verify the container stays running
-echo "Waiting 10 seconds to verify container is healthy..."
-sleep 10
-
-if docker compose ps --status running | grep -q .; then
-    echo "Deployment complete! Container is running."
+# --wait blocks until every service with a healthcheck is healthy (or
+# running, if it has none) and exits non-zero on timeout or unhealthy.
+echo "Starting container and waiting for healthcheck..."
+if docker compose up -d --wait --wait-timeout 60; then
+    echo "Deployment complete! Container is healthy."
 else
-    echo "ERROR: Container is not running after 10 seconds!" >&2
+    echo "ERROR: Container did not become healthy within 60 seconds!" >&2
     docker compose logs --tail 50
     exit 1
 fi

@@ -36,13 +36,16 @@ def create_app(config_dir: str = ".") -> Flask:
     Returns:
         A fully configured Flask application ready to serve requests.
     """
+    # Configure the handler before loading so config warnings and errors
+    # use the final format; the configured level is applied afterwards.
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
     app_config: AppConfig = load_app_config(config_dir)
     directory: Directory = load_directory(config_dir)
     themes: list[str] = discover_themes(config_dir)
 
-    # Configure logging
-    log_level = getattr(logging, app_config.log_level.upper(), logging.INFO)
-    logging.basicConfig(level=log_level, format="%(levelname)s: %(message)s")
+    # Apply the configured log level now that AppConfig is known
+    logging.getLogger().setLevel(app_config.log_level.upper())
 
     app = Flask(__name__)
 

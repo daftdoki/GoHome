@@ -11,10 +11,12 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import sys
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any
+from urllib.parse import urlsplit
 
 import yaml
 
@@ -33,6 +35,9 @@ _ENV_VAR_MAP: dict[str, str] = {
 """Mapping from ``config.yml`` keys to their environment variable overrides."""
 
 _KNOWN_CONFIG_KEYS: frozenset[str] = frozenset(_ENV_VAR_MAP)
+
+_CONTROL_CHARS: re.Pattern[str] = re.compile(r"[\x00-\x1f\x7f]")
+"""Matches ASCII control characters, including tab, CR and LF."""
 
 
 def load_app_config(config_dir: str) -> AppConfig:
@@ -91,6 +96,14 @@ def load_app_config(config_dir: str) -> AppConfig:
         except ValueError, TypeError:
             logger.error("Invalid port value: %r", kwargs["port"])
             sys.exit(1)
+
+    # Log level must name a standard logging level
+    if "log_level" in kwargs:
+        level_name = str(kwargs["log_level"])
+        if level_name.upper() not in logging.getLevelNamesMapping():
+            logger.warning("Invalid log_level %r; falling back to INFO", level_name)
+            level_name = "info"
+        kwargs["log_level"] = level_name
 
     return AppConfig(config_dir=str(Path(config_dir).resolve()), **kwargs)
 
@@ -188,12 +201,38 @@ def _register_slug(
     slug_map[slug] = item
 
 
+def _is_http_url(value: Any) -> bool:
+    """Check that a value is an ``http`` or ``https`` URL with a host.
+
+    Args:
+        value: The raw ``url`` value from the YAML entry.
+
+    Returns:
+        ``True`` if *value* is a string with an ``http``/``https`` scheme
+        (compared case-insensitively) and a non-empty host, and has no
+        leading or trailing whitespace and no control characters.
+        ``urlsplit`` silently drops tabs and newlines, so they are
+        rejected first; otherwise they would reach the redirect header.
+    """
+    if not isinstance(value, str):
+        return False
+    if value != value.strip() or _CONTROL_CHARS.search(value):
+        return False
+    try:
+        parts = urlsplit(value)
+        host = parts.hostname
+    except ValueError:
+        return False
+    return parts.scheme in ("http", "https") and bool(host)
+
+
 def _process_entry(
     entry: Any,
     items: list[DirectoryItem],
     slug_map: dict[str, DirectoryItem],
     *,
     nested: bool,
+    parent_name: str = "",
 ) -> None:
     """Validate and process a single directory entry.
 
@@ -202,6 +241,7 @@ def _process_entry(
         items: The list of top-level items being built.
         slug_map: The slug-to-item mapping being built.
         nested: Whether this entry is inside a category.
+        parent_name: Name of the enclosing category, used in error messages.
     """
     if not isinstance(entry, dict):
         logger.error("Directory entry must be a mapping, got: %r", type(entry).__name__)
@@ -234,13 +274,20 @@ def _process_entry(
     # Category (entries key present — url is ignored if both exist)
     if has_entries:
         if nested:
-            child_count = (
-                len(entry["entries"]) if isinstance(entry["entries"], list) else 0
+            logger.error(
+                "Nested category %r inside %r is not allowed; "
+                "only one level of category is supported",
+                name,
+                parent_name,
             )
+            sys.exit(1)
+
+        if has_url:
             logger.warning(
-                "Nested category %r skipped (%d entries discarded)", name, child_count
+                "Entry %r has both 'url' and 'entries'; treating it as a "
+                "category and ignoring the url",
+                name,
             )
-            return
 
         raw_children = entry["entries"]
         if not isinstance(raw_children, list) or len(raw_children) == 0:
@@ -258,7 +305,13 @@ def _process_entry(
         _register_aliases(aliases, str(name), cat, slug_map)
 
         for child_entry in raw_children:
-            _process_entry(child_entry, child_items, slug_map, nested=True)
+            _process_entry(
+                child_entry,
+                child_items,
+                slug_map,
+                nested=True,
+                parent_name=str(name),
+            )
 
         # Rebuild the category with its children now populated
         cat = CategoryEntry(
@@ -275,6 +328,13 @@ def _process_entry(
         items.append(cat)
     else:
         # Link entry
+        if not _is_http_url(entry["url"]):
+            logger.error(
+                "Entry %r has invalid url %r; must be an http or https URL",
+                name,
+                entry["url"],
+            )
+            sys.exit(1)
         link = LinkEntry(
             name=str(name),
             slug=slug,

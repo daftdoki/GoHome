@@ -5,7 +5,11 @@ from __future__ import annotations
 import importlib.metadata
 from typing import TYPE_CHECKING
 
+from gohome import create_app
+
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from flask.testing import FlaskClient
 
 
@@ -176,3 +180,50 @@ class TestVersionFooter:
         """The GitHub repo link is rendered as a clickable anchor."""
         html = client.get("/").get_data(as_text=True)
         assert '<a href="https://github.com/daftdoki/GoHome">' in html
+
+
+class TestTopAnchor:
+    """Verify the back-to-top anchor cannot collide with category ids."""
+
+    def test_body_anchor_renamed(self, client: FlaskClient) -> None:
+        """The body anchor is gohome-top and back-to-top links target it."""
+        html = client.get("/").get_data(as_text=True)
+        assert 'id="gohome-top"' in html
+        assert 'id="top"' not in html
+        assert 'href="#gohome-top"' in html
+
+    def test_category_named_top(self, tmp_path: Path) -> None:
+        """A category named Top keeps id="top" and gohome-top stays unique."""
+        (tmp_path / "directory.yml").write_text(
+            "directory:\n"
+            "  - name: Top\n"
+            "    entries:\n"
+            "      - name: A\n"
+            "        url: https://a.example\n",
+            encoding="utf-8",
+        )
+        app = create_app(str(tmp_path))
+        html = app.test_client().get("/").get_data(as_text=True)
+        assert html.count('id="gohome-top"') == 1
+        assert html.count('id="top"') == 1
+
+
+class TestCategoryNav:
+    """Verify the Categories: nav only renders when categories exist."""
+
+    def test_nav_present_with_categories(self, client: FlaskClient) -> None:
+        """The sample directory has categories, so the nav renders."""
+        html = client.get("/").get_data(as_text=True)
+        assert 'class="category-nav"' in html
+        assert "Categories:" in html
+
+    def test_nav_absent_without_categories(self, tmp_path: Path) -> None:
+        """A links-only directory renders no category nav."""
+        (tmp_path / "directory.yml").write_text(
+            "directory:\n  - name: A\n    url: https://a.example\n",
+            encoding="utf-8",
+        )
+        app = create_app(str(tmp_path))
+        html = app.test_client().get("/").get_data(as_text=True)
+        assert "category-nav" not in html
+        assert "Categories:" not in html

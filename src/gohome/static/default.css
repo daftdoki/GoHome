@@ -280,6 +280,20 @@ header h1 {
 }
 
 /* ------------------------------------------------------------------ */
+/* Link-not-found notice (root page, after redirect from unknown path) */
+/* ------------------------------------------------------------------ */
+.notfound {
+    margin: 0 0 var(--spacing);
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-link);
+    border-radius: 4px;
+    background: var(--color-category-bg);
+    color: var(--color-text);
+    overflow-wrap: anywhere;
+}
+
+/* ------------------------------------------------------------------ */
 /* Back to top                                                        */
 /* ------------------------------------------------------------------ */
 .back-to-top {

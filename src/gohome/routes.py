@@ -8,6 +8,7 @@ pages, the favicon, custom theme CSS serving, and a
 from __future__ import annotations
 
 import logging
+import re
 import string
 from pathlib import Path
 from urllib.parse import quote, quote_from_bytes, urlsplit, urlunsplit
@@ -23,6 +24,9 @@ _NOTFOUND_MAX_LENGTH = 100
 
 _QUERY_SAFE: str = string.punctuation.replace("#", "")
 """Query bytes passed through unencoded: ASCII punctuation except ``#``."""
+
+_CONTROL_CHARS: re.Pattern[str] = re.compile(r"[\x00-\x1f\x7f]")
+"""Matches ASCII control characters, escaped before a path is logged."""
 
 logger = logging.getLogger(__name__)
 
@@ -65,14 +69,19 @@ def register_routes(app: Flask) -> None:
         """Log one INFO line per request, since waitress has no access log.
 
         The line holds the method, path with query, status code and, for
-        redirects, the ``Location`` target.
+        redirects, the ``Location`` target.  Werkzeug decodes ``%0a`` and
+        similar escapes in the path, so control characters are written
+        back as ``%XX`` to stop a request from forging extra log lines.
         """
         location = response.headers.get("Location")
         target = f" -> {location}" if location else ""
+        path = _CONTROL_CHARS.sub(
+            lambda m: f"%{ord(m.group()):02X}", request.full_path.rstrip("?")
+        )
         logger.info(
             "%s %s %d%s",
             request.method,
-            request.full_path.rstrip("?"),
+            path,
             response.status_code,
             target,
         )

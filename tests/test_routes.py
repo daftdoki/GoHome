@@ -324,3 +324,13 @@ class TestAccessLog:
         with caplog.at_level(logging.INFO, logger="gohome.routes"):
             client.get("/")
         assert "GET / 200" in caplog.text
+
+    def test_control_characters_escaped(
+        self, client: FlaskClient, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """A decoded newline in the path can't forge a second log line."""
+        with caplog.at_level(logging.INFO, logger="gohome.routes"):
+            client.get("/foo%0aERROR:%20fake%0d%09line")
+        messages = [r.getMessage() for r in caplog.records]
+        assert not any(c in m for m in messages for c in "\r\n\t")
+        assert any("GET /foo%0AERROR: fake%0D%09line " in m for m in messages)
